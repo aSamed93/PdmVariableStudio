@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU</Platforms>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+  </PropertyGroup>
+
+  <!-- BU PROJEYE BASKA REFERANS EKLEMEYIN.
+       Vault'a yuklenen paket = bu DLL + EPDM.Interop.epdm.dll, toplam iki dosya.
+       Her ek DLL, Administration'a yuklenmesi ve unutulmamasi gereken bir dosya daha
+       demek; unutulunca PDM yanilticit bir "not a multi-threaded COM-server" iletisi
+       veriyor ve eksik dosyayi SOYLEMIYOR.
+
+       Ozellikle PdmVariableStudio.Core'a referans vermeyin: Core sik degisen bir bilesen
+       (karsilastirma kurallari, calisma kitabi duzeni) ve vault'a girerse her surumde tum
+       istemcilerde Explorer kapatmak gerekir. Eklentinin gunlugu bu yuzden AddInLog.cs
+       icinde ayri duruyor.
+
+       Asil uygulama ayri bir surectir: src/PdmVariableStudio.App -> PdmVariableStudio.exe -->
+  <ItemGroup>
+    <Reference Include="EPDM.Interop.epdm">
+      <HintPath>C:\Program Files\SOLIDWORKS PDM\EPDM.Interop.epdm.dll</HintPath>
+      <EmbedInteropTypes>false</EmbedInteropTypes>
+      <!-- Interop EKLENTI PAKETINE KOPYALANIR. GAC'ta degil, yalnizca PDM kurulum
+           klasorunde duruyor. IEdmAddIn5 uygulayan tip yuklenirken interop sart ve onu
+           yalnizca app base'i PDM klasoru olan surecler bulabiliyor; Explorer'da eklenti
+           ilk yuklenen yonetilen bilesense cozumleme 0x80070002 ile duser ve PDM bunu
+           yanilticit bir "not a multi-threaded COM-server" iletisiyle gosterir.
+           BUNU GERI ALMAYIN. -->
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+</Project>

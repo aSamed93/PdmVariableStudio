@@ -1,0 +1,65 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!--
+        Renk ve tipografinin TEK KAYNAĞI. XAML'in başka hiçbir yerine onaltılık renk
+        yazılmaz; bileşenler yalnızca buradaki anahtarlara başvurur.
+
+        Durum renkleri erişilebilirlik gereği tek başına anlam taşımaz: her durum ayrıca
+        bir simge ve bir metinle gösterilir (bkz. ChangeRowViewModel.StatusGlyph /
+        StatusText). Renk körlüğü ve yüksek kontrast temalarında bilgi kaybolmaz.
+    -->
+
+    <!-- yüzeyler -->
+    <SolidColorBrush x:Key="Surface.Background" Color="#FFFFFFFF" />
+    <SolidColorBrush x:Key="Surface.Panel" Color="#FFF7F8FA" />
+    <SolidColorBrush x:Key="Surface.Border" Color="#FFD8DCE3" />
+    <SolidColorBrush x:Key="Surface.Header" Color="#FFEDF1F7" />
+
+    <!-- metin -->
+    <SolidColorBrush x:Key="Text.Primary" Color="#FF1B1F24" />
+    <SolidColorBrush x:Key="Text.Secondary" Color="#FF5A6472" />
+    <SolidColorBrush x:Key="Text.Disabled" Color="#FF9AA3AF" />
+
+    <!-- vurgu -->
+    <SolidColorBrush x:Key="Accent" Color="#FF1F6FEB" />
+    <SolidColorBrush x:Key="Accent.Hover" Color="#FF1A5FD0" />
+
+    <!-- durum: arka plan ve metin çiftleri -->
+    <SolidColorBrush x:Key="Status.Safe.Background" Color="#FFE7F6EC" />
+    <SolidColorBrush x:Key="Status.Safe.Foreground" Color="#FF10662B" />
+
+    <SolidColorBrush x:Key="Status.Applied.Background" Color="#FFD7F0DF" />
+    <SolidColorBrush x:Key="Status.Applied.Foreground" Color="#FF0B4F20" />
+
+    <SolidColorBrush x:Key="Status.Conflict.Background" Color="#FFFDF0E3" />
+    <SolidColorBrush x:Key="Status.Conflict.Foreground" Color="#FF8A4B08" />
+
+    <SolidColorBrush x:Key="Status.Error.Background" Color="#FFFDEAEA" />
+    <SolidColorBrush x:Key="Status.Error.Foreground" Color="#FF8C1C1C" />
+
+    <SolidColorBrush x:Key="Status.Blocked.Background" Color="#FFF1F2F4" />
+    <SolidColorBrush x:Key="Status.Blocked.Foreground" Color="#FF5A6472" />
+
+    <SolidColorBrush x:Key="Status.Neutral.Background" Color="#FFEAF1FB" />
+    <SolidColorBrush x:Key="Status.Neutral.Foreground" Color="#FF1F4E8C" />
+
+    <SolidColorBrush x:Key="Status.Default.Background" Color="Transparent" />
+    <SolidColorBrush x:Key="Status.Default.Foreground" Color="#FF5A6472" />
+
+    <!-- uyarı şeridi -->
+    <SolidColorBrush x:Key="Warning.Background" Color="#FFFFF6DF" />
+    <SolidColorBrush x:Key="Warning.Border" Color="#FFE0B44A" />
+    <SolidColorBrush x:Key="Warning.Foreground" Color="#FF6B4A05" />
+
+    <SolidColorBrush x:Key="Danger.Background" Color="#FFFDEAEA" />
+    <SolidColorBrush x:Key="Danger.Border" Color="#FFD98686" />
+    <SolidColorBrush x:Key="Danger.Foreground" Color="#FF8C1C1C" />
+
+    <!-- tipografi -->
+    <FontFamily x:Key="Font.Ui">Segoe UI</FontFamily>
+    <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Font.Size.Normal">12</system:Double>
+    <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Font.Size.Small">11</system:Double>
+    <system:Double xmlns:system="clr-namespace:System;assembly=mscorlib" x:Key="Font.Size.Title">15</system:Double>
+
+</ResourceDictionary>

@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU</Platforms>
+    <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0</Version>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- BU PROJEYE EPDM.Interop.epdm REFERANSI EKLEMEYIN.
+       Core'un PDM istemcisi olmadan derlenebilmesi katman ayriminin canli kanitidir;
+       interop eklenirse test projesi PDM'siz makinede derlenemez ve bunu hicbir
+       tasarim kurali degil, yalnizca bu kural yakalar. COM ile konusan her sey
+       PdmVariableStudio.AddIn icinde kalir. -->
+  <ItemGroup>
+    <!-- OpenXML SDK'nin net46 varligi SIFIR transitive bagimlilik tasir
+         (System.IO.Packaging .NET Framework'te WindowsBase icinde gelir).
+         ClosedXML secilmedi: net481'de 9 ek DLL getiriyor ve PDM eklentisi
+         Administration'a DUZ bir DLL listesi olarak yukleniyor - eksik kalan
+         her dosya yanilticit bir yukleme hatasi demek. -->
+    <PackageReference Include="DocumentFormat.OpenXml" Version="3.1.1" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <OutputType>WinExe</OutputType>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU</Platforms>
+    <AssemblyName>PdmVariableStudio</AssemblyName>
+    <RootNamespace>PdmVariableStudio.App</RootNamespace>
+    <StartupObject>PdmVariableStudio.App.Program</StartupObject>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PdmVariableStudio.Core\PdmVariableStudio.Core.csproj" />
+
+    <Reference Include="EPDM.Interop.epdm">
+      <HintPath>C:\Program Files\SOLIDWORKS PDM\EPDM.Interop.epdm.dll</HintPath>
+      <EmbedInteropTypes>false</EmbedInteropTypes>
+      <!-- Interop exe klasorune KOPYALANIR. Eklentiden farkli olarak burada gerekce
+           basit: uygulama PDM tarafindan barindirilmadigi icin app base'i PDM kurulum
+           klasoru degil, kendi klasoru. Ayni yaklasim PDMetry.DemoSeed'de de var. -->
+      <Private>true</Private>
+    </Reference>
+
+    <Reference Include="System.Drawing" />
+  </ItemGroup>
+</Project>

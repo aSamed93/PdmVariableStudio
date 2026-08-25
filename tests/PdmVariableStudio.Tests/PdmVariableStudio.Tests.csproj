@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net481</TargetFramework>
+    <LangVersion>latest</LangVersion>
+    <Nullable>enable</Nullable>
+    <Platforms>AnyCPU</Platforms>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+  <!-- YALNIZCA Core. AddIn'e referans verilmez: testlerin PDM istemcisi
+       olmayan bir makinede kosabilmesi bilincli bir kisit. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\PdmVariableStudio.Core\PdmVariableStudio.Core.csproj" />
+  </ItemGroup>
+</Project>
