@@ -34,7 +34,6 @@ coverage*.xml
 ~$*.xlsx
 # İşlem günlüğü ve uygulama günlüğü makine-yereldir.
 studio.log
-journal/
 settings.json
 
 ## Windows
