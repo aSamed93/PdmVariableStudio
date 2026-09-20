@@ -476,7 +476,12 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                     new UndoService(vaultContext, reader, journal, apply, _log),
                     journal,
                     vaultContext.GetVariables().ValueOr(Array.Empty<PdmVariableDefinition>()),
-                    vaultContext.GetFolderPath(_folderId).ValueOr(string.Empty));
+                    // Klasör yalnızca eklentiden gelir. Tek başına açılışta 0'dır ve
+                    // GetObject(Folder, 0) interop tarafında ArgumentException fırlatır —
+                    // sormamak, sorup düşmekten iyidir.
+                    _folderId > 0
+                        ? vaultContext.GetFolderPath(_folderId).ValueOr(string.Empty)
+                        : string.Empty);
             });
 
             _vault = setup.Vault;
