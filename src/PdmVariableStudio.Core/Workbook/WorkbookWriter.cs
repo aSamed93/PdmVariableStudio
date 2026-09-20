@@ -527,7 +527,7 @@ public sealed class WorkbookWriter
 public static class ProductInfo
 {
     /// <summary>Ürün sürümü (SemVer). Eklenti sürümünden ve şema sürümlerinden AYRIDIR.</summary>
-    public const string Version = "1.0.0";
+    public const string Version = "1.1.0";
 
     public const string Name = "PDM Variable Studio";
 }

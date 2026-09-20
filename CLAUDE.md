@@ -267,14 +267,18 @@ metni gösterilmez.
 
 ## Çalışma zamanı dosyaları (hata ayıklarken ilk bakılacak yerler)
 
-Hepsi `%LOCALAPPDATA%\PdmVariableStudio\` altında:
+Hepsi `%LOCALAPPDATA%\PdmVariableStudio\` altında; arayüzdeki **Hakkında** penceresi
+(`Views/AboutDialog.cs`) hepsini tek tıkla açar ve "Bilgileri Kopyala" ile destek için
+derler:
 
 | Dosya | Kim yazar |
 |---|---|
-| `studio.log` (+ `.1`…`.N` döndürülmüş kopyalar) | hem uygulama (`Core/Diagnostics/StudioLog.cs`) hem eklenti (`AddIn/AddInLog.cs`) — aynı dosya |
-| `journal\<vault>\...` (indeks + `operations\<id>.jsonl`) | işlem günlüğü |
+| `studio.log` (+ `.1`…`.N` döndürülmüş kopyalar) | hem uygulama (`Core/Diagnostics/StudioLog.cs`) hem eklenti (`AddIn/AddInLog.cs`) — aynı dosya. Arayüz dışı çökmeler de buraya düşer (`Program.cs` → `AppDomain.UnhandledException`) |
+| `journal\<vault>\index.jsonl` + `ops\<id>.jsonl` | işlem günlüğü. Kök **ayarlanabilir**: `App/JournalRootResolver.cs` — öncelik `HKLM\SOFTWARE\PdmVariableStudio\JournalRoot` > `settings.json` `journalRoot` > varsayılan. Erişilemeyen kök varsayılana DÜŞMEZ; işlem başlamaz |
+| `settings.json` | kullanıcı tercihleri (`Core/Settings/StudioSettings.cs`, FlatJson, tek satır). Yok/bozuk → varsayılanlar; yazma hatası sessiz. Yeni alan eklerken `Load` **ve** `Save` ikisine birden |
 
-Bu dosyalar `.gitignore` ile depo dışında tutulur (`studio.log`, `journal/`, `*.xlsx`).
+Bu dosyalar `.gitignore` ile depo dışında tutulur (`studio.log`, `*.xlsx`, `settings.json`).
+`journal/` kuralı **kaldırıldı** — Windows'ta `Core/Journal/` kaynak klasörünü de yutuyordu.
 
 ## Doğrulanmamış API davranışları
 
@@ -325,7 +329,14 @@ istemcide Explorer kapatılması demek. Yeni kod `App` projesine aittir.
 `DocumentFormat.OpenXml.dll`, `DocumentFormat.OpenXml.Framework.dll`
 
 `docs/verify-package.ps1` iki listeyi de denetler; `docs/install-app.ps1` uygulamayı kurup
-kayıt defteri değerini yazar.
+kayıt defteri değerini yazar. `docs/package-release.ps1` GitHub Releases için zip + SHA-256
+üretir (`artifacts/`).
+
+**Yayım paketine `EPDM.Interop.epdm.dll` KONMAZ.** Dassault Systèmes'in dosyası; yeniden
+dağıtım hakkımız yok ve her PDM istemcisinde zaten var. `install-app.ps1` onu
+`C:\Program Files\SOLIDWORKS PDM\` altından kopyalar; eklenti için kullanıcı aynı yerden
+alıp vault'a yükler (`docs/KULLANIM.md`). Yerel derleme çıktısında (`bin/`) bulunması
+normaldir — `Private=true` gerekçesi aşağıda — ama pakete girmez.
 
 **`EPDM.Interop.epdm.dll` pakete kopyalanır — bunu geri almayın.** Interop GAC'ta değil,
 yalnızca PDM kurulum klasöründe. `IEdmAddIn5` uygulayan tip yüklenirken interop şart ve onu
@@ -345,8 +356,8 @@ Dördü **ayrıdır**, birbirine bağlanmaz:
 
 | Sürüm | Yer | Ne zaman artar |
 |---|---|---|
-| `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version` | ürün sürümü (SemVer) |
-| `AddInVersion` | `AddIn/VariableStudioAddIn.GetAddInInfo` (`mlAddInVersion`) **ve** `AddIn/AssemblyInfo.cs` | **her vault yüklemesinde**, ikisi birlikte — eklenti nadiren değişir, bu yüzden nadiren artar |
+| `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version`; `Core`/`App` csproj `Version`; `app.manifest` `assemblyIdentity` | ürün sürümü (SemVer); `package-release.ps1` zip adını buradan alır, `CHANGELOG.md`'ye bölüm eklenir |
+| `AddInVersion` | `AddIn/VariableStudioAddIn.GetAddInInfo` (`mlAddInVersion`) **ve** `AddIn/AssemblyInfo.cs` | **her vault yüklemesinde**, ikisi birlikte — eklenti nadiren değişir, bu yüzden nadiren artar. `CHANGELOG.md`'de o sürüm **(eklenti güncellendi)** ile işaretlenir |
 | `WorkbookSchemaVersion` | `Core/Workbook/WorkbookSchema.cs` | `.xlsx` düzeni değiştiğinde |
 | `JournalSchemaVersion` | `Core/Journal/JsonlOperationJournal.cs` | günlük satır düzeni değiştiğinde |
 
@@ -356,6 +367,7 @@ dosyaların ne olacağı [docs/WORKBOOK-CONTRACT.md](docs/WORKBOOK-CONTRACT.md) 
 
 ## Ön koşullar
 
-- SOLIDWORKS PDM Professional 2025 client (33.5)
+- SOLIDWORKS PDM Professional client — geliştirme 2025 (33.5) üzerinde; eklenti en düşük
+  **2022 (30.0)** istiyor (`mlRequiredVersionMajor/Minor`). Daha eski istemcide denenmedi.
 - .NET Framework 4.8.1 targeting pack
 - `C:\Program Files\SOLIDWORKS PDM\EPDM.Interop.epdm.dll` (csproj `HintPath` ile buradan okur)
