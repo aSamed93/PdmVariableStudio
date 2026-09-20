@@ -11,6 +11,24 @@
     </windowsSettings>
   </application>
 
+  <!-- Common Controls v6 ZORUNLU. WPF'in kendisi buna ihtiyac duymaz, ama PDM'in dosya
+       secme penceresi (IEdmVault5.BrowseForFile) yerel bir Win32 penceredir ve bu surecin
+       icinde acilir. Bu bagimlilik bildirilmeyince surece COMCTL32 5.82 (eski v5)
+       yukleniyor; PDM'in penceresi Explorer'da v6 ile calismaya gore yazilmis ve pencere
+       icindeki aramada v5'te bellek ihlaliyle (0xc0000005, AccessViolationException)
+       tum sureci dusuruyordu. Olay gunlugu 2026-09-20, hatali modul COMCTL32.dll 5.82. -->
+  <dependency>
+    <dependentAssembly>
+      <assemblyIdentity
+        type="win32"
+        name="Microsoft.Windows.Common-Controls"
+        version="6.0.0.0"
+        processorArchitecture="*"
+        publicKeyToken="6595b64144ccf1df"
+        language="*" />
+    </dependentAssembly>
+  </dependency>
+
   <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
     <application>
       <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}" /><!-- Windows 10/11 -->
