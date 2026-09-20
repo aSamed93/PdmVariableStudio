@@ -125,6 +125,13 @@ internal sealed class PdmVaultContext : IPdmVaultContext
             scope.Track(folder);
             return OperationOutcome<string>.Success(ToRelativePath(folder.LocalPath, _vault.RootFolderPath));
         }
+        catch (ArgumentException exception)
+        {
+            // Geçersiz bir klasör numarası (örn. 0) için PDM COM hatası DEĞİL,
+            // ArgumentException fırlatıyor — gerçek vault'ta günlükle görüldü.
+            _log.Warn($"Klasör {folderId} için geçersiz numara: {exception.Message}");
+            return OperationOutcome<string>.Failure(IssueCode.FolderNotFound, folderId.ToString());
+        }
         catch (COMException exception)
         {
             return OperationOutcome<string>.Failure(

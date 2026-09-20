@@ -129,6 +129,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
     private ChangeSet? _changeSet;
     private string _workbookPath = string.Empty;
+    private string _lastExportPath = string.Empty;
     private bool _checkoutConsent;
     private bool _checkInAfterApply = true;
     private string _checkInComment = "PDM Variable Studio ile toplu kart güncellemesi";
@@ -169,6 +170,10 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         ClearFilesCommand = new RelayCommand(ClearFiles, () => !IsBusy && Files.Count > 0);
 
         ExportCommand = new RelayCommand(async () => await ExportAsync(), () => !IsBusy);
+        OpenLastExportCommand = new RelayCommand(
+            () => OpenLastExport(revealInFolder: false), () => LastExportPath.Length > 0);
+        RevealLastExportCommand = new RelayCommand(
+            () => OpenLastExport(revealInFolder: true), () => LastExportPath.Length > 0);
         ImportCommand = new RelayCommand(async () => await ImportAsync(), () => !IsBusy);
         ApplyCommand = new RelayCommand(async () => await ApplyAsync(), CanApply);
         CancelCommand = new RelayCommand(Cancel, () => IsBusy && !IsCommitting);
@@ -258,6 +263,27 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         get => _workbookPath;
         private set => Set(ref _workbookPath, value);
     }
+
+    /// <summary>
+    /// Bu oturumda son yazılan çalışma kitabının tam yolu; boşsa henüz dışa aktarım yok.
+    /// Kullanıcı dosyayı Excel'de açıp düzenlemeye hemen başlayabilsin diye tutulur.
+    /// </summary>
+    public string LastExportPath
+    {
+        get => _lastExportPath;
+        private set
+        {
+            if (Set(ref _lastExportPath, value))
+            {
+                Raise(nameof(LastExportFileName));
+                OpenLastExportCommand.RaiseCanExecuteChanged();
+                RevealLastExportCommand.RaiseCanExecuteChanged();
+            }
+        }
+    }
+
+    public string LastExportFileName =>
+        _lastExportPath.Length > 0 ? System.IO.Path.GetFileName(_lastExportPath) : string.Empty;
 
     public bool CheckoutConsent
     {
@@ -419,6 +445,12 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
     public RelayCommand ExportCommand { get; }
 
+    /// <summary>Son dışa aktarılan çalışma kitabını varsayılan uygulamada (Excel) açar.</summary>
+    public RelayCommand OpenLastExportCommand { get; }
+
+    /// <summary>Son dışa aktarılan çalışma kitabını Gezgin'de seçili gösterir.</summary>
+    public RelayCommand RevealLastExportCommand { get; }
+
     public RelayCommand ImportCommand { get; }
 
     public RelayCommand ApplyCommand { get; }
@@ -476,7 +508,12 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                     new UndoService(vaultContext, reader, journal, apply, _log),
                     journal,
                     vaultContext.GetVariables().ValueOr(Array.Empty<PdmVariableDefinition>()),
-                    vaultContext.GetFolderPath(_folderId).ValueOr(string.Empty));
+                    // Klasör yalnızca eklentiden gelir. Tek başına açılışta 0'dır ve
+                    // GetObject(Folder, 0) interop tarafında ArgumentException fırlatır —
+                    // sormamak, sorup düşmekten iyidir.
+                    _folderId > 0
+                        ? vaultContext.GetFolderPath(_folderId).ValueOr(string.Empty)
+                        : string.Empty);
             });
 
             _vault = setup.Vault;
@@ -888,6 +925,43 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
     // ---------------------------------------------------------- dışa aktarım
 
+    /// <summary>
+    /// Son dışa aktarılan dosyayı açar. Dosya kullanıcı tarafından taşınmış/silinmiş olabilir;
+    /// o durumda hata penceresi değil durum satırında kısa bir açıklama gösterilir.
+    /// </summary>
+    private void OpenLastExport(bool revealInFolder)
+    {
+        var path = LastExportPath;
+        if (path.Length == 0)
+        {
+            return;
+        }
+
+        if (!System.IO.File.Exists(path))
+        {
+            StatusMessage = $"Dosya artık burada değil: {path}";
+            LastExportPath = string.Empty;
+            return;
+        }
+
+        try
+        {
+            // UseShellExecute: .xlsx için kayıtlı uygulama (Excel) açılır; Gezgin için
+            // /select ile dosya seçili gelir. Kabuk kaydı yoksa Win32Exception döner.
+            var startInfo = revealInFolder
+                ? new System.Diagnostics.ProcessStartInfo("explorer.exe", "/select,\"" + path + "\"")
+                : new System.Diagnostics.ProcessStartInfo(path);
+
+            startInfo.UseShellExecute = true;
+            System.Diagnostics.Process.Start(startInfo)?.Dispose();
+        }
+        catch (System.ComponentModel.Win32Exception exception)
+        {
+            _log.Error("Dışa aktarılan dosya açılamadı: " + path, exception);
+            StatusMessage = "Dosya açılamadı; .xlsx için kayıtlı bir uygulama bulunamadı. Ayrıntı: " + _log.FilePath;
+        }
+    }
+
     private async Task ExportAsync()
     {
         if (_exportService is null)
@@ -952,6 +1026,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             // Excel yazımı saf .NET; COM yok, thread havuzunda çalışabilir.
             await Task.Run(() => new WorkbookWriter().Write(outcome.Value, dialog.FileName, token), token);
 
+            LastExportPath = dialog.FileName;
             StatusMessage = $"{outcome.Value.Rows.Count} satır dışa aktarıldı: {dialog.FileName}";
             _log.Info($"Dışa aktarım tamamlandı: {dialog.FileName}");
         }

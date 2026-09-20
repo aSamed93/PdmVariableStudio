@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Bu dosya, bu depoda çalışan Claude Code'a (claude.ai/code) rehberlik eder.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > **Dil kuralı:** Tanımlayıcılar (sınıf, metot, alan, enum) **İngilizce**; XML doküman
 > etiketleri, kod yorumları, belgeler ve kullanıcıya görünen tüm metinler **Türkçe**.
@@ -9,14 +9,47 @@ Bu dosya, bu depoda çalışan Claude Code'a (claude.ai/code) rehberlik eder.
 ## Ne olduğu
 
 SOLIDWORKS PDM Professional 2025 eklentisi (`IEdmAddIn5`, COM, .NET Framework 4.8.1, WPF).
-PDM Explorer'da bir klasöre sağ tıklanarak açılır. Klasördeki dosyaların **kart değişkenlerini**
-`.xlsx` dosyasına aktarır, kullanıcı Excel'de düzenler, dosyayı geri yükler; uygulama
-**three-way karşılaştırma** yapıp bir **önizleme** gösterir ve ancak onaydan sonra PDM'yi
-günceller. Her işlem yerel bir **işlem günlüğüne** yazılır ve daha sonra **güvenle geri
-alınabilir**.
+PDM Explorer'da Araçlar menüsünden (ya da bağlam menüsünden) açılır. Seçilen dosyaların
+**kart değişkenlerini** `.xlsx` dosyasına aktarır, kullanıcı Excel'de düzenler, dosyayı geri
+yükler; uygulama **three-way karşılaştırma** yapıp bir **önizleme** gösterir ve ancak onaydan
+sonra PDM'yi günceller. Her işlem yerel bir **işlem günlüğüne** yazılır ve daha sonra
+**güvenle geri alınabilir**.
 
 Bu bir Excel içe/dışa aktarma betiği değil. Ürünün varlık sebebi veri bütünlüğü:
 çakışma tespiti, checkout politikası ve mevcut değeri kontrol eden geri alma.
+
+## Komutlar
+
+```bash
+dotnet build PdmVariableStudio.sln -c Release
+dotnet test tests/PdmVariableStudio.Tests -c Debug
+powershell -File docs/verify-package.ps1      # iki paketin dosya listesini denetler
+powershell -File docs/install-app.ps1         # uygulamayı kurar, kayıt defteri değerini yazar
+```
+
+Tek bir test sınıfı ya da testi çalıştırmak (xUnit, `FullyQualifiedName` ile süzülür;
+test ad alanları `PdmVariableStudio.Tests.<Klasör>`):
+
+```bash
+dotnet test tests/PdmVariableStudio.Tests -c Debug --filter "FullyQualifiedName~UndoServiceTests"
+```
+
+```bash
+dotnet test tests/PdmVariableStudio.Tests -c Debug --filter "FullyQualifiedName~NumberParsingRegressionTests.TurkceOndalik_BinlikAyraciSanilipOnKatBuyutulmez"
+```
+
+Uygulamayı eklentisiz denemek (vault'u kendi sorar, dosya listesi boş açılır):
+
+```bash
+src/PdmVariableStudio.App/bin/Release/net481/PdmVariableStudio.exe
+```
+
+`dotnet build` net481 hedefinde sorunsuz çalışıyor (dotnet SDK 10); Visual Studio'nun
+MSBuild'ini aramaya gerek yok. `dotnet test` çıktısı bu makinede Türkçe gelir
+("Başarılı! - Başarısız: 0 ..."). Testler PDM istemcisi olmadan koşar; `App` ve `AddIn`
+derlemesi için `C:\Program Files\SOLIDWORKS PDM\EPDM.Interop.epdm.dll` gerekir.
+
+Lint/format aracı yok; stil kaynak dosyaların kendisidir.
 
 ## İki süreçli mimari — en önemli tasarım kararı
 
@@ -26,7 +59,7 @@ başlatıcıdır:
 ```
 PDM Explorer                          ayrı süreç
 ─────────────                         ──────────────────────────
-klasöre sağ tık
+menüden komut
     ↓
 PdmVariableStudio.AddIn.dll  ──────>  PdmVariableStudio.exe
 (vault'ta, 2 DLL, ~390 KB)   Process   (diskte, ~7 MB)
@@ -49,12 +82,12 @@ taşınmıyor**, yalnızca vault adı ve klasör numarası geçiyor.
 src/PdmVariableStudio.Core     alan modelleri, diff motoru, workbook sözleşmesi,
                                işlem günlüğü, akış servisleri  — INTEROP YOK, WPF YOK
 src/PdmVariableStudio.App      PdmVariableStudio.exe: STA çalışma kuyruğu, PDM adaptörleri,
-                               WPF arayüz, vault/klasör seçimi
+                               WPF arayüz, vault seçimi
 src/PdmVariableStudio.AddIn    yalnızca IEdmAddIn5 + Process.Start — BAŞKA REFERANSI YOK
 tests/PdmVariableStudio.Tests  xUnit — PDM istemcisi olmadan çalışır
 ```
 
-Bağımlılık yönü tek yönlü: `AddIn → (hiçbir şey)`, `App → Core`.
+Bağımlılık yönü tek yönlü: `AddIn → (hiçbir şey)`, `App → Core`, `Tests → Core`.
 
 > **Core'a `EPDM.Interop.epdm` referansı EKLEMEYİN.** Eklenirse testler PDM istemcisi
 > olmayan bir makinede derlenemez hâle gelir ve bunu hiçbir tasarım kuralı değil, yalnızca
@@ -65,23 +98,51 @@ Bağımlılık yönü tek yönlü: `AddIn → (hiçbir şey)`, `App → Core`.
 > duruyor. Yeni kod `App` projesine aittir. Gerekçe `PdmVariableStudio.AddIn.csproj`
 > içinde yazılı.
 
-## Komutlar
+### Süreçler arası sözleşme: komut satırı
 
-```bash
-dotnet build PdmVariableStudio.sln -c Release
-dotnet test tests/PdmVariableStudio.Tests -c Debug
-powershell -File docs/verify-package.ps1
-powershell -File docs/install-app.ps1
-```
+Eklenti uygulamayı `--vault "<ad>" --folder <id>` ile başlatır (`App/Program.cs` →
+`StartupOptions.Parse`). Hiçbiri zorunlu değil; tanınmayan argümanlar **sessizce atlanır**.
+Bu bilinçli: eski eklenti sürümleri `--parent <hwnd>` gönderiyor ve uygulama onu artık
+kullanmıyor — argüman sözleşmesini geriye uyumlu tutmak, uygulamayı güncellerken eklentiyi
+(dolayısıyla vault'u) yeniden yüklememek demek. **Yeni bir argümanı zorunlu yapmayın.**
 
-Uygulamayı eklentisiz denemek (vault ve klasörü kendi sorar):
+Eklenti exe'yi `AddIn/AppLocator.cs` ile bulur: `HKLM\SOFTWARE\PdmVariableStudio\InstallPath`
+→ `HKCU\...` → `%ProgramFiles%\PDM Variable Studio\` → `%ProgramFiles(x86)%\...`. Yalnızca
+exe'nin varlığına bakmaz; eşlik eden DLL'ler eksikse (`FindMissingCompanions`) süreci hiç
+başlatmaz ve eksik dosyaları söyler — çünkü `Process.Start` eksik derlemede de başarılı
+döner, süreç sonra sessizce ölür.
 
-```bash
-src/PdmVariableStudio.App/bin/Release/net481/PdmVariableStudio.exe
-```
+## Core'un iç akışı — birden çok dosyaya yayılan resim
 
-`dotnet build` net481 hedefinde sorunsuz çalışıyor; Visual Studio'nun MSBuild'ini aramaya
-gerek yok.
+Core, PDM'yi yalnızca `Core/Abstractions/IPdmAbstractions.cs` içindeki arayüzler üzerinden
+görür: `IPdmVaultContext`, `IPdmFolderScanner`, `IPdmFileBrowser`, `IPdmVariableReader`,
+`IPdmVariableWriter`, `IPdmCheckoutService`, `IStudioLog` ve `IOperationJournal.cs`.
+İki gerçekleştirim vardır:
+
+- `App/Pdm/*` — gerçek interop (`PdmVaultContext`, `PdmVariableReader`, `PdmVariableWriter`,
+  `PdmCheckoutService`, `PdmFolderScanner`, `PdmFileBrowser`)
+- `tests/Fakes/FakePdm.cs` — `FakeVault` tek sınıfta dört arayüzü birden uygular; bir test
+  yazarken PDM tarafını buradan kurun
+
+Dört akış servisi (`Core/Services/`) bu arayüzleri alır ve `OperationOutcome<T>` döner:
+
+| Servis | Giriş noktası | Ne üretir |
+|---|---|---|
+| `ExportService` | `BuildSession` | `ExportSession` → `WorkbookWriter` `.xlsx` yazar |
+| `ImportService` | `BuildChangeSet` | `WorkbookReader` okur, PDM'den taze değer çeker, `ThreeWayDiffEngine` sınıflandırır → `ChangeSet` |
+| `ApplyService` | `Apply` | checkout → günlüğe niyet → yazma → günlüğe sonuç → (bizimse) check-in |
+| `UndoService` | `BuildPreview`, `Undo` | günlük kaydını güncel PDM değeriyle karşılaştırır; `Undo` içeride `ApplyService`'i kullanır |
+
+**Sonuç deseni:** başarısızlık istisnayla değil `OperationOutcome<T>` + `ValidationIssue`
+(`IssueCode` + `IssueSeverity` + bağlam) ile taşınır. Kullanıcıya gösterilen metin
+`Results/IssueCode.cs` içindeki `IssueText`'ten gelir; COM hataları `App/Pdm/PdmErrorTranslator.cs`
+ile `IssueCode`'a çevrilir (bilinen HRESULT → PDM'in `GetErrorName` metni → genel kod +
+günlüğe tam ayrıntı). Yeni bir hata durumu eklerken önce `IssueCode` + Türkçe metin ekleyin.
+
+**App tarafında kablolama** tek yerde: `App/ViewModels/StudioViewModel.cs` içinde, vault
+oturumu açıldıktan sonra `_queue.RunAsync` bloğunda tüm adaptörler ve servisler kurulur.
+PDM'ye dokunan **her** çağrı `PdmWorkQueue.RunAsync` ile STA thread'ine gönderilir;
+arayüz thread'inden doğrudan interop çağrısı yapılmaz.
 
 ## Dokunmadan önce bilinmesi gerekenler
 
@@ -125,17 +186,25 @@ gerçekten yapılmış bir değişikliğin geri alma bilgisi kaybolur.
 **Günlük açılamıyorsa işlem HİÇ BAŞLATILMAZ.** Geri alınamayacak bir değişiklik yapmaktansa
 hiç yapmamak yeğdir.
 
-### Menü bayrakları: görünürlük bayrağa, doğruluk koda
+Günlük `Core/Journal/JsonlOperationJournal.cs` içinde; vault başına bir klasör, işlem
+başına bir `.jsonl` dosyası ve bir indeks. JSON için dış bağımlılık yok — `FlatJson.cs`
+eldeki küçük yazıcı/okuyucu.
 
-İlk sürümde komut klasör bağlam menüsünde **hiç görünmedi**. Günlük `GetAddInInfo`'nun
-sorunsuz çalıştığını gösteriyordu; sorun beş bayrağın birlikte verilmesiydi.
-`EdmMenu_OnlyFolders`, `EdmMenu_MustHaveSelection` ve `EdmMenu_OnlySingleSelection`
-**dosya listesi seçimi** semantiğine ait ve klasör ağacında komutu bastırıyorlar.
+### Menü bayrağı: TEK bayrak, süzgeç yok
 
-Şimdi yalnızca üç bayrak veriliyor (`ContextMenuItemFolder | ContextMenuItem |
-ShowInMenuBarTools`) ve filtreleme `OnCmd` içinde, loglanabilir biçimde yapılıyor.
-**Bayrak eklerken dikkat:** her kısıtlayıcı bayrak, komutun görünmez kalması için yeni bir
-yol demek ve bu sessiz bir başarısızlık.
+`RegisterCommand` yalnızca `EdmMenu_ShowInMenuBarTools` veriyor. Buraya iki başarısız
+denemeden sonra gelindi ve gerekçe `AddIn/VariableStudioAddIn.cs` içinde ayrıntılı yazılı:
+
+- `OnlyFolders | MustHaveSelection | OnlySingleSelection` (0x1–0x10) **süzgeçtir**, dosya
+  listesi seçimi semantiğine ait; klasör ağacında komutu tamamen bastırdı.
+- `ContextMenuItem` (0x400) ve `ContextMenuItemFolder` (0x800) verildiğinde `AddCmd` hata
+  vermedi ama komut **hiçbir yerde** görünmedi — kayıt sessizce geçersiz kaldı.
+- Bağlam menüsü varsayılandır (`EdmMenu_NeverInContextMenu` diye bir çıkarma bayrağı olması
+  bunun kanıtı). Kardeş proje PDMetry de aynı tek bayrakla çalışıyor.
+
+Hangi bağlamdan gelindiği `OnCmd` içinde, loglanabilir biçimde çözülür. **Bayrak eklemeyin:**
+her kısıtlayıcı bayrak, komutun görünmez kalması için yeni bir yol ve bu sessiz bir
+başarısızlık.
 
 ### COM nesnesi thread geçmez — ve süreç hiç geçmez
 
@@ -151,6 +220,9 @@ Alınan her COM nesnesi `ComScope` ile deterministik biçimde bırakılır. Öze
 **değişken numaralandırıcısı `Flush()` ile check-in arasında AÇIKÇA bırakılmalıdır**;
 bırakılmazsa yerel dosya açık kalır ve check-in `0x8004020B` ile düşer. Referansı çöp
 toplayıcıya bırakmak çare değil — check-in aynı metot içinde yapılıyor.
+
+`OnCmd` içinden sızan bir istisna COM sınırını geçer ve Explorer'ı düşürebilir; eklentinin
+her giriş noktası bu yüzden kendi `try/catch`'i içinde ve hatayı `AddInLog`'a yazar.
 
 ### Sayı ayrıştırmada sıra kritik
 
@@ -182,17 +254,34 @@ Her durum arayüzde **simge + metin + renk** ile gösterilir. Renk körlüğü v
 temalarında bilgi kaybolmamalı. Renkler yalnızca `Themes/Palette.xaml` içinde tanımlıdır;
 XAML'in başka hiçbir yerine onaltılık renk yazılmaz.
 
+Tema `Program.cs` içinde **uygulama** kaynaklarına birleştirilir, pencereye değil:
+`StatusBrushConverter` fırçaları çalışma anında `Application.Current.TryFindResource` ile
+çözer ve o arama yalnızca uygulama kaynaklarına bakar. Pencereye taşınırsa durum rozetleri
+saydam kalır — hata vermez, sadece görünmez.
+
 ### `catch (Exception) { }` yasak
 
 Beklenen her durum bir `IssueCode` taşır ve `Results/IssueCode.cs` içinde Türkçe karşılığı
 vardır (kısa metin + neden + önerilen eylem). Kullanıcıya asla ham HRESULT ya da istisna
 metni gösterilmez.
 
+## Çalışma zamanı dosyaları (hata ayıklarken ilk bakılacak yerler)
+
+Hepsi `%LOCALAPPDATA%\PdmVariableStudio\` altında:
+
+| Dosya | Kim yazar |
+|---|---|
+| `studio.log` (+ `.1`…`.N` döndürülmüş kopyalar) | hem uygulama (`Core/Diagnostics/StudioLog.cs`) hem eklenti (`AddIn/AddInLog.cs`) — aynı dosya |
+| `journal\<vault>\...` (indeks + `operations\<id>.jsonl`) | işlem günlüğü |
+
+Bu dosyalar `.gitignore` ile depo dışında tutulur (`studio.log`, `journal/`, `*.xlsx`).
+
 ## Doğrulanmamış API davranışları
 
 Bazı PDM davranışları dokümantasyondan teyit edilemedi (help.solidworks.com bu makineden 403
-döndürüyor). Kodda `PHASE 0'DA DOĞRULANACAK` yorumuyla işaretliler ve her biri **tek bir
-yerde** toplandı.
+döndürüyor). Kodda `PHASE 0'DA DOĞRULANACAK` yorumuyla işaretliler (şu an üç yer:
+`App/Pdm/PdmVariableReader.cs`, `App/Pdm/PdmVariableWriter.cs`, `App/Threading/PdmWorkQueue.cs`)
+ve her biri **tek bir yerde** toplandı.
 
 **Gerçek vault'ta doğrulanmadan üretime kurmayın:**
 [docs/SPIKE-PHASE0.md](docs/SPIKE-PHASE0.md).
@@ -202,6 +291,10 @@ yerde** toplandı.
 PDM .NET eklentileri çalışan istemciye yeniden yüklenemez. Yeni derlemeyi denemeden önce
 **tüm PDM Explorer ve Administration pencerelerini kapatın**, sonra açın. Unutulduğunda eski
 DLL çalışmaya devam eder ve "değişiklik işe yaramadı" yanılgısı doğar.
+
+Bu yalnızca **eklenti** için geçerli. Uygulama (`App`) ayrı süreç olduğu için Explorer açıkken
+bile yeniden derlenip `install-app.ps1` ile değiştirilebilir — iki süreçli mimarinin asıl
+kazancı bu.
 
 Adım adım kurulum ve kabul kontrolleri: [docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md).
 
@@ -253,7 +346,7 @@ Dördü **ayrıdır**, birbirine bağlanmaz:
 | Sürüm | Yer | Ne zaman artar |
 |---|---|---|
 | `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version` | ürün sürümü (SemVer) |
-| `AddInVersion` | `AddIn/VariableStudioAddIn.GetAddInInfo` **ve** `AddIn/AssemblyInfo.cs` | **her vault yüklemesinde**, ikisi birlikte — eklenti nadiren değişir, bu yüzden nadiren artar |
+| `AddInVersion` | `AddIn/VariableStudioAddIn.GetAddInInfo` (`mlAddInVersion`) **ve** `AddIn/AssemblyInfo.cs` | **her vault yüklemesinde**, ikisi birlikte — eklenti nadiren değişir, bu yüzden nadiren artar |
 | `WorkbookSchemaVersion` | `Core/Workbook/WorkbookSchema.cs` | `.xlsx` düzeni değiştiğinde |
 | `JournalSchemaVersion` | `Core/Journal/JsonlOperationJournal.cs` | günlük satır düzeni değiştiğinde |
 

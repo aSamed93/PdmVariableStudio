@@ -178,6 +178,13 @@ internal sealed class PdmFolderScanner : IPdmFolderScanner
 
             return OperationOutcome.Success();
         }
+        catch (ArgumentException exception)
+        {
+            // Klasör numarası eklenti argümanından geliyor; geçersizse PDM COM hatası
+            // değil ArgumentException fırlatıyor (bkz. PdmVaultContext.GetFolderPath).
+            _log.Warn($"Klasör {folderId} için geçersiz numara: {exception.Message}");
+            return OperationOutcome.Failure(IssueCode.FolderNotFound, folderId.ToString());
+        }
         catch (COMException exception)
         {
             return OperationOutcome.Failure(
