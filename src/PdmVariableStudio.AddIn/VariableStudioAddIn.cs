@@ -56,11 +56,16 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
             // 3: menü bayrakları asgariye indirildi (bkz. RegisterCommand).
             // 4: eksik kurulum artık sessiz ölmek yerine açık ileti veriyor.
             // 5: uygulamaya ön plan hakkı devrediliyor (pencere arkada açılıyordu).
-            addInInfo.mlAddInVersion = 5;
+            // 6: gerekli PDM sürümü 33.5'ten 30.0'a indirildi (aşağıda).
+            addInInfo.mlAddInVersion = 6;
 
-            // SOLIDWORKS PDM Professional 2025 = 33.5.
-            addInInfo.mlRequiredVersionMajor = 33;
-            addInInfo.mlRequiredVersionMinor = 5;
+            // En düşük desteklenen istemci: SOLIDWORKS PDM Professional 2022 (= 30.0).
+            // Geliştirme ve doğrulama 2025 (33.5) üzerinde yapıldı; kullanılan API'lerin
+            // hepsi (IEdmVault5/7/11, IEdmEnumeratorVariable5, IEdmSearch, BrowseForFile)
+            // 30 ve sonrasında var. Daha eski istemciye izin vermenin anlamı yok: interop
+            // tip kimlikleri değişiyor ve eklenti yüklenirken sessizce düşer.
+            addInInfo.mlRequiredVersionMajor = 30;
+            addInInfo.mlRequiredVersionMinor = 0;
 
             RegisterCommand(commandManager);
 

@@ -2,9 +2,11 @@ using System;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using PdmVariableStudio.App.Views;
 using PdmVariableStudio.Core.Diagnostics;
+using PdmVariableStudio.Core.Workbook;
 
 namespace PdmVariableStudio.App;
 
@@ -35,10 +37,33 @@ internal static class Program
     {
         var log = new StudioLog();
 
+        // Arayüz dışındaki çökmeler. DispatcherUnhandledException yalnızca UI thread'ini
+        // görür; PDM çalışma kuyruğu, thread havuzu ya da sonlandırıcı thread'inden sızan
+        // bir istisna buradan geçmeden süreci düşürür ve günlükte HİÇ iz bırakmazdı
+        // (2026-09-20'deki dosya penceresi çökmesi böyle bulundu: yalnızca Windows olay
+        // günlüğünde). Süreç yine düşer — bunu engelleyemeyiz — ama en azından ne olduğu
+        // studio.log'a yazılır ve kullanıcı destek isterken tek bir dosya gönderir.
+        AppDomain.CurrentDomain.UnhandledException += (_, e) =>
+        {
+            var exception = e.ExceptionObject as Exception;
+            log.Error(
+                "İşlenmeyen istisna; süreç sonlanıyor. " +
+                $"Sürüm {ProductInfo.Version}, sonlandırıyor mu: {e.IsTerminating}.",
+                exception);
+        };
+
+        // Beklenmeyen bir Task istisnası: gözlenmemiş kalırsa .NET 4.x'te süreci düşürmez
+        // ama sessizce kaybolur. Günlüğe yazıp gözlendi sayıyoruz.
+        TaskScheduler.UnobservedTaskException += (_, e) =>
+        {
+            log.Error("Gözlenmemiş Task istisnası.", e.Exception);
+            e.SetObserved();
+        };
+
         try
         {
             var options = StartupOptions.Parse(args);
-            log.Info($"Uygulama başlatıldı. {options}");
+            log.Info($"Uygulama başlatıldı. Sürüm {ProductInfo.Version}. {options}");
 
             // Başlangıçta OnExplicitShutdown: vault seçme penceresi ana pencereden ÖNCE
             // açılıyor ve kapandığında "son pencere kapandı" sayılıp uygulama daha

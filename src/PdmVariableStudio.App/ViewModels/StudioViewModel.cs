@@ -19,6 +19,7 @@ using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Journal;
 using PdmVariableStudio.Core.Results;
 using PdmVariableStudio.Core.Services;
+using PdmVariableStudio.Core.Settings;
 using PdmVariableStudio.Core.Workbook;
 
 namespace PdmVariableStudio.App.ViewModels;
@@ -105,6 +106,14 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     private readonly int _folderId;
     private readonly string _databaseName;
 
+    /// <summary>
+    /// Kullanıcı tercihleri. Her değişiklikte diske yazılır — pencere çökerse de kaybolmasın.
+    /// Yükleme sırasında yazmayı önlemek için <see cref="_settingsLoaded"/> bayrağı var.
+    /// </summary>
+    private readonly StudioSettings _settings;
+    private readonly JournalRoot _journalRoot;
+    private bool _settingsLoaded;
+
     private IPdmVaultContext? _vault;
     private ExportService? _exportService;
     private ImportService? _importService;
@@ -154,6 +163,22 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         _databaseName = databaseName;
         _queue = new PdmWorkQueue(vaultName, log);
 
+        _settings = StudioSettings.Load();
+        _includeSubfolders = _settings.IncludeSubfolders;
+        _checkInAfterApply = _settings.CheckInAfterApply;
+        _checkInComment = _settings.CheckInComment;
+        _settingsLoaded = true;
+
+        // Dosya yoksa varsayılanlarla oluştur: kullanıcı journalRoot gibi bir alanı elle
+        // düzenleyecekse dosyayı ve alan adlarını arayıp bulmak zorunda kalmasın.
+        if (!System.IO.File.Exists(StudioSettings.DefaultPath()))
+        {
+            _settings.Save();
+        }
+
+        _journalRoot = JournalRootResolver.Resolve(_settings, log);
+        log.Info($"İşlem geçmişi kökü: {_journalRoot.Path} ({_journalRoot.SourceText}).");
+
         Variables = new ObservableCollection<VariableChoice>();
         Files = new ObservableCollection<FileRowViewModel>();
         Changes = new ObservableCollection<ChangeRowViewModel>();
@@ -184,6 +209,22 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         RefreshOperationsCommand = new RelayCommand(async () => await LoadOperationsAsync(), () => !IsBusy);
         PreviewUndoCommand = new RelayCommand(async () => await PreviewUndoAsync(), CanPreviewUndo);
         ApplyUndoCommand = new RelayCommand(async () => await ApplyUndoAsync(), CanApplyUndo);
+        ShowAboutCommand = new RelayCommand(
+            () => AboutDialog.Show(_windowHandle, _log, _journalRoot.Path, _journalRoot.SourceText));
+    }
+
+    /// <summary>Tercih değişince diske yaz. Yükleme sırasında ve değişmeyen değerde yazmaz.</summary>
+    private void PersistSettings()
+    {
+        if (!_settingsLoaded)
+        {
+            return;
+        }
+
+        _settings.IncludeSubfolders = _includeSubfolders;
+        _settings.CheckInAfterApply = _checkInAfterApply;
+        _settings.CheckInComment = _checkInComment;
+        _settings.Save();
     }
 
     // ------------------------------------------------------------------ durum
@@ -216,7 +257,13 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     public bool IncludeSubfolders
     {
         get => _includeSubfolders;
-        set => Set(ref _includeSubfolders, value);
+        set
+        {
+            if (Set(ref _includeSubfolders, value))
+            {
+                PersistSettings();
+            }
+        }
     }
 
     public bool IsBusy
@@ -300,13 +347,25 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     public bool CheckInAfterApply
     {
         get => _checkInAfterApply;
-        set => Set(ref _checkInAfterApply, value);
+        set
+        {
+            if (Set(ref _checkInAfterApply, value))
+            {
+                PersistSettings();
+            }
+        }
     }
 
     public string CheckInComment
     {
         get => _checkInComment;
-        set => Set(ref _checkInComment, value);
+        set
+        {
+            if (Set(ref _checkInComment, value))
+            {
+                PersistSettings();
+            }
+        }
     }
 
     // ---- özet sayaçlar ----
@@ -471,6 +530,8 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
     public RelayCommand ApplyUndoCommand { get; }
 
+    public RelayCommand ShowAboutCommand { get; }
+
     // ------------------------------------------------------------ başlatma
 
     public async Task InitializeAsync()
@@ -494,7 +555,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 var checkout = new PdmCheckoutService(_queue.Vault, reader, _log);
                 var scanner = new PdmFolderScanner(_queue.Vault, _log);
                 var browser = new PdmFileBrowser(_queue.Vault, _log);
-                var journal = new JsonlOperationJournal();
+                var journal = new JsonlOperationJournal(_journalRoot.Path);
 
                 var apply = new ApplyService(vaultContext, reader, writer, checkout, journal, _log);
 
@@ -988,12 +1049,15 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             FileName = BuildDefaultFileName(),
             AddExtension = true,
             OverwritePrompt = true,
+            InitialDirectory = RememberedExportDirectory(),
         };
 
         if (dialog.ShowDialog() != true)
         {
             return;
         }
+
+        RememberExportDirectory(dialog.FileName);
 
         _cancellation = new CancellationTokenSource();
         IsBusy = true;
@@ -1048,6 +1112,25 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>Son dışa aktarım klasörü hâlâ varsa onu, yoksa boş (Windows varsayılanı).</summary>
+    private string RememberedExportDirectory()
+    {
+        var directory = _settings.LastExportDirectory;
+        return directory.Length > 0 && System.IO.Directory.Exists(directory) ? directory : string.Empty;
+    }
+
+    private void RememberExportDirectory(string filePath)
+    {
+        var directory = System.IO.Path.GetDirectoryName(filePath) ?? string.Empty;
+        if (directory.Length == 0 || directory == _settings.LastExportDirectory)
+        {
+            return;
+        }
+
+        _settings.LastExportDirectory = directory;
+        _settings.Save();
+    }
+
     private string BuildDefaultFileName()
     {
         var folder = FolderPath.TrimStart('\\').Replace('\\', '-');
@@ -1077,6 +1160,8 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         {
             Filter = "Excel çalışma kitabı (*.xlsx)|*.xlsx",
             CheckFileExists = true,
+            // Dışa aktarılan dosya büyük olasılıkla aynı klasörden geri gelecek.
+            InitialDirectory = RememberedExportDirectory(),
         };
 
         if (dialog.ShowDialog() != true)

@@ -19,11 +19,17 @@ PDM Explorer'da klasöre sağ tık
 
 | | |
 |---|---|
-| **Hedef** | SOLIDWORKS PDM Professional 2025 (33.5) |
+| **Hedef** | SOLIDWORKS PDM Professional 2022 (30.0) ve üstü; 2025 (33.5) üzerinde geliştirildi |
 | **Platform** | .NET Framework 4.8.1, WPF, AnyCPU |
-| **Ürün sürümü** | 1.0.0 |
-| **Test** | 116 birim testi, PDM istemcisi olmadan koşar |
+| **Ürün sürümü** | 1.1.0 — [değişiklikler](CHANGELOG.md) |
+| **Lisans** | [MIT](LICENSE) — ücretsiz, lisans anahtarı yok |
+| **Gizlilik** | Hiçbir yere veri göndermez; günlük ve geçmiş yalnızca yerel diskte |
+| **Test** | 121 birim testi, PDM istemcisi olmadan koşar |
 | **Durum** | Gerçek vault'ta uçtan uca doğrulandı (dışa aktar → düzenle → içe aktar → uygula → geri al) |
+
+> SOLIDWORKS ve SOLIDWORKS PDM, Dassault Systèmes'in tescilli markalarıdır. Bu proje
+> bağımsızdır; Dassault Systèmes ile bağlantılı değildir. Araç PDM'ye **yazar** — ilk
+> kullanımdan önce küçük bir klasörde deneyin ve vault yedeğinizin güncel olduğundan emin olun.
 
 ---
 
@@ -130,13 +136,21 @@ Son işlemler, geri alma önizlemesi, geri al.
 
 ## Kurulum
 
-İki ayrı paket var: uygulama diske kurulur, eklentinin **iki DLL'i** vault'a yüklenir.
+Son kullanıcı için adım adım anlatım ve sorun giderme: **[docs/KULLANIM.md](docs/KULLANIM.md)**.
+Hazır paket: [Releases](https://github.com/aSamed93/PdmVariableStudio/releases).
+
+Kaynaktan: iki ayrı paket var, uygulama diske kurulur, eklentinin **iki DLL'i** vault'a
+yüklenir.
 
 ```powershell
 dotnet build PdmVariableStudio.sln -c Release
-powershell -File docs\verify-package.ps1
-powershell -File docs\install-app.ps1
+powershell -ExecutionPolicy Bypass -File docs\verify-package.ps1
+powershell -ExecutionPolicy Bypass -File docs\install-app.ps1
 ```
+
+Yayım paketi üretmek: `powershell -ExecutionPolicy Bypass -File docs\package-release.ps1`
+(`artifacts\` altına zip + SHA-256; `EPDM.Interop.epdm.dll` bilerek pakete girmez,
+kurulum betiği onu PDM istemcisinden kopyalar).
 
 Ardından `src\PdmVariableStudio.AddIn\bin\Release\net481\` altındaki **iki dosyayı**
 (`PdmVariableStudio.AddIn.dll` ve `EPDM.Interop.epdm.dll`) Administration → Add-ins ile
@@ -147,7 +161,9 @@ vault'a yükleyin ve tüm Explorer pencerelerini kapatıp açın.
 > dosyayı **söylemez**. `docs/verify-package.ps1` her iki paketi de denetler.
 
 Uygulama ağ paylaşımına da kurulabilir; yol `HKLM\SOFTWARE\PdmVariableStudio\InstallPath`
-ile bildirilir. Ayrıntı ve kabul kontrolleri: [docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md).
+ile bildirilir. İşlem geçmişi de ekip için bir paylaşıma yönlendirilebilir
+(`HKLM\SOFTWARE\PdmVariableStudio\JournalRoot`). Ayrıntı ve kabul kontrolleri:
+[docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md).
 
 ## Depo yapısı
 
@@ -174,6 +190,8 @@ dotnet test tests/PdmVariableStudio.Tests -c Debug
 
 | Belge | İçerik |
 |---|---|
+| [docs/KULLANIM.md](docs/KULLANIM.md) | **Son kullanıcı kılavuzu:** kurulum, kullanım, sorun giderme |
+| [CHANGELOG.md](CHANGELOG.md) | Sürüm notları |
 | [CLAUDE.md](CLAUDE.md) | Mimari kararların gerekçeleri ve **dokunmadan önce bilinmesi gerekenler** |
 | [docs/WORKBOOK-CONTRACT.md](docs/WORKBOOK-CONTRACT.md) | `.xlsx` formatının tam tanımı ve "kullanıcı şunu yaparsa ne olur" tablosu |
 | [docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md) | Kurulum adımları ve kabul kontrol listeleri |
@@ -191,6 +209,7 @@ performans ve tazeleme davranışıyla ilgili; hiçbiri sessiz veri kaybı riski
 
 ## Sonraya bırakılanlar
 
-MVP kapsamı dışında bilinçli olarak bırakılanlar: redo, merkezî/paylaşımlı işlem günlüğü,
-zamanlanmış dışa aktarım, BOM düzenleme, vault'lar arası göç, web arayüzü,
+MVP kapsamı dışında bilinçli olarak bırakılanlar: redo, eşzamanlı yazmaya dayanıklı
+merkezî işlem günlüğü (paylaşıma yönlendirme var, kilitleme yok), kod imzası, İngilizce
+arayüz, zamanlanmış dışa aktarım, BOM düzenleme, vault'lar arası göç, web arayüzü,
 `IEdmBatchListing4` ile hızlandırılmış okuma yolu (önce ölçüm gerekiyor).

@@ -39,3 +39,6 @@ settings.json
 ## Windows
 Thumbs.db
 desktop.ini
+
+## Yayım paketleri (package-release.ps1 çıktısı)
+artifacts/
