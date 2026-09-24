@@ -79,7 +79,8 @@ pencerelerini kapatın, sonra açın. Aynı şey eklentiyi her güncellediğiniz
 
 - **PDM Explorer'dan:** vault içinde bir klasördeyken **Araçlar** menüsünden (ya da sağ tık
   menüsünden) *PDM Variable Studio*. O klasörün dosyaları hazır gelir.
-- **Doğrudan:** `PdmVariableStudio.exe` (Başlat menüsünden ya da kurulum klasöründen).
+- **Doğrudan:** kurulum klasöründeki `PdmVariableStudio.exe` (varsayılan
+  `C:\Program Files\PDM Variable Studio\`; kurulum Başlat menüsü kısayolu oluşturmaz).
   Birden fazla vault'unuz varsa hangisine bağlanacağı sorulur; liste boş açılır.
 
 ### Dışa Aktar sekmesi

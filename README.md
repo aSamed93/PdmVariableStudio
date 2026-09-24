@@ -27,6 +27,11 @@ PDM Explorer'da klasöre sağ tık
 | **Test** | 121 birim testi, PDM istemcisi olmadan koşar |
 | **Durum** | Gerçek vault'ta uçtan uca doğrulandı (dışa aktar → düzenle → içe aktar → uygula → geri al) |
 
+> **Kurulum ve kullanım kılavuzu (PDF):**
+> [docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf](docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf)
+> — indirme, kurulum, eklentiyi vault'a yükleme, günlük kullanım ve sorun giderme; tek belgede,
+> tıklanabilir içindekiler ile.
+
 > SOLIDWORKS ve SOLIDWORKS PDM, Dassault Systèmes'in tescilli markalarıdır. Bu proje
 > bağımsızdır; Dassault Systèmes ile bağlantılı değildir. Araç PDM'ye **yazar** — ilk
 > kullanımdan önce küçük bir klasörde deneyin ve vault yedeğinizin güncel olduğundan emin olun.
@@ -136,7 +141,9 @@ Son işlemler, geri alma önizlemesi, geri al.
 
 ## Kurulum
 
-Son kullanıcı için adım adım anlatım ve sorun giderme: **[docs/KULLANIM.md](docs/KULLANIM.md)**.
+Son kullanıcı için adım adım anlatım ve sorun giderme:
+**[Kurulum ve Kullanım Kılavuzu (PDF)](docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf)** ya da
+kısa hâli **[docs/KULLANIM.md](docs/KULLANIM.md)**.
 Hazır paket: [Releases](https://github.com/aSamed93/PdmVariableStudio/releases).
 
 Kaynaktan: iki ayrı paket var, uygulama diske kurulur, eklentinin **iki DLL'i** vault'a
@@ -190,7 +197,8 @@ dotnet test tests/PdmVariableStudio.Tests -c Debug
 
 | Belge | İçerik |
 |---|---|
-| [docs/KULLANIM.md](docs/KULLANIM.md) | **Son kullanıcı kılavuzu:** kurulum, kullanım, sorun giderme |
+| [docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf](docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf) | **Kurulum ve kullanım kılavuzu (PDF):** indirme, kurulum, eklenti, kullanım, sorun giderme, kaldırma |
+| [docs/KULLANIM.md](docs/KULLANIM.md) | Son kullanıcı kılavuzunun kısa hâli (yayım paketine de girer) |
 | [CHANGELOG.md](CHANGELOG.md) | Sürüm notları |
 | [CLAUDE.md](CLAUDE.md) | Mimari kararların gerekçeleri ve **dokunmadan önce bilinmesi gerekenler** |
 | [docs/WORKBOOK-CONTRACT.md](docs/WORKBOOK-CONTRACT.md) | `.xlsx` formatının tam tanımı ve "kullanıcı şunu yaparsa ne olur" tablosu |
