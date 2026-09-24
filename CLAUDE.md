@@ -25,6 +25,7 @@ dotnet build PdmVariableStudio.sln -c Release
 dotnet test tests/PdmVariableStudio.Tests -c Debug
 powershell -File docs/verify-package.ps1      # iki paketin dosya listesini denetler
 powershell -File docs/install-app.ps1         # uygulamayı kurar, kayıt defteri değerini yazar
+python docs/guide/build_guide.py              # kurulum ve kullanım kılavuzunu (PDF) yeniden üretir
 ```
 
 Tek bir test sınıfı ya da testi çalıştırmak (xUnit, `FullyQualifiedName` ile süzülür;
@@ -50,6 +51,16 @@ MSBuild'ini aramaya gerek yok. `dotnet test` çıktısı bu makinede Türkçe ge
 derlemesi için `C:\Program Files\SOLIDWORKS PDM\EPDM.Interop.epdm.dll` gerekir.
 
 Lint/format aracı yok; stil kaynak dosyaların kendisidir.
+
+### Kullanıcı kılavuzu (PDF)
+
+`docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf` **üretilmiş bir dosyadır**; kaynağı
+`docs/guide/build_guide.py` (metin, tablolar ve bölümler betiğin içinde). PDF'i elle
+düzenlemeyin. Arayüzde bir düğme adı, durum, ayar ya da kurulum adımı değiştiğinde betiği
+aynı değişiklikle güncelleyip PDF'i yeniden üretin ve ikisini birlikte commit edin —
+`docs/KULLANIM.md` de aynı içeriğin kısa hâlidir, o da güncellenir. Tek bağımlılık
+`reportlab` (`docs/guide/requirements.txt`); derlemeyi ve testleri etkilemez. Sürüm
+numarası `ProductInfo.Version`'dan okunur, çıktı deterministiktir (aynı kaynak → aynı bayt).
 
 ## İki süreçli mimari — en önemli tasarım kararı
 
@@ -356,7 +367,7 @@ Dördü **ayrıdır**, birbirine bağlanmaz:
 
 | Sürüm | Yer | Ne zaman artar |
 |---|---|---|
-| `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version`; `Core`/`App` csproj `Version`; `app.manifest` `assemblyIdentity` | ürün sürümü (SemVer); `package-release.ps1` zip adını buradan alır, `CHANGELOG.md`'ye bölüm eklenir |
+| `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version`; `Core`/`App` csproj `Version`; `app.manifest` `assemblyIdentity` | ürün sürümü (SemVer); `package-release.ps1` zip adını ve kılavuz PDF'i sürüm numarasını buradan alır (PDF yeniden üretilir), `CHANGELOG.md`'ye bölüm eklenir |
 | `AddInVersion` | `AddIn/VariableStudioAddIn.GetAddInInfo` (`mlAddInVersion`) **ve** `AddIn/AssemblyInfo.cs` | **her vault yüklemesinde**, ikisi birlikte — eklenti nadiren değişir, bu yüzden nadiren artar. `CHANGELOG.md`'de o sürüm **(eklenti güncellendi)** ile işaretlenir |
 | `WorkbookSchemaVersion` | `Core/Workbook/WorkbookSchema.cs` | `.xlsx` düzeni değiştiğinde |
 | `JournalSchemaVersion` | `Core/Journal/JsonlOperationJournal.cs` | günlük satır düzeni değiştiğinde |
