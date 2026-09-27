@@ -41,13 +41,11 @@ internal sealed class PdmCheckoutService : IPdmCheckoutService
 
         try
         {
-            if (_vault.GetObject(EdmObjectType.EdmObject_File, file.FileId) is not IEdmFile5 pdmFile)
+            var pdmFile = PdmFileLookup.GetLiveFile(_vault, file, scope);
+            if (pdmFile is null)
             {
                 return OperationOutcome<CheckoutState>.Failure(IssueCode.FileNotFound, file.ToString());
             }
-
-            scope.Track(pdmFile);
-            pdmFile.Refresh();
 
             if (!pdmFile.IsLocked)
             {
@@ -77,13 +75,11 @@ internal sealed class PdmCheckoutService : IPdmCheckoutService
 
         try
         {
-            if (_vault.GetObject(EdmObjectType.EdmObject_File, file.FileId) is not IEdmFile5 pdmFile)
+            var pdmFile = PdmFileLookup.GetLiveFile(_vault, file, scope);
+            if (pdmFile is null)
             {
                 return CheckoutResult.Failed(IssueCode.FileNotFound, file.ToString());
             }
-
-            scope.Track(pdmFile);
-            pdmFile.Refresh();
 
             if (pdmFile.IsLocked)
             {
@@ -125,13 +121,11 @@ internal sealed class PdmCheckoutService : IPdmCheckoutService
 
         try
         {
-            if (_vault.GetObject(EdmObjectType.EdmObject_File, file.FileId) is not IEdmFile5 pdmFile)
+            var pdmFile = PdmFileLookup.GetLiveFile(_vault, file, scope);
+            if (pdmFile is null)
             {
                 return OperationOutcome.Failure(IssueCode.FileNotFound, file.ToString());
             }
-
-            scope.Track(pdmFile);
-            pdmFile.Refresh();
 
             if (!pdmFile.IsLocked)
             {
@@ -159,13 +153,11 @@ internal sealed class PdmCheckoutService : IPdmCheckoutService
 
         try
         {
-            if (_vault.GetObject(EdmObjectType.EdmObject_File, file.FileId) is not IEdmFile5 pdmFile)
+            var pdmFile = PdmFileLookup.GetLiveFile(_vault, file, scope);
+            if (pdmFile is null)
             {
                 return OperationOutcome.Failure(IssueCode.FileNotFound, file.ToString());
             }
-
-            scope.Track(pdmFile);
-            pdmFile.Refresh();
 
             if (!pdmFile.IsLocked)
             {

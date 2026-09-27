@@ -4,6 +4,18 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/), sürümleme
 [SemVer](https://semver.org/lang/tr/). Uygulama sürümü ile eklenti sürümü ayrıdır; eklentiyi
 yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir.
 
+## [1.1.1] — 2026-09-27
+
+### Düzeltildi
+- **Eski bir çalışma kitabı, silinip yeniden eklenmiş dosyaların yerel kopyasına
+  yazıyordu.** Yeniden eklenen dosya yeni bir kimlik alır; PDM silinen dosyanın nesnesini
+  hâlâ döndürdüğü için eski kimlik hata vermeden okunuyor, check-out "başarılı" oluyor ve
+  aynı yerel yoldaki yeni dosyanın salt okunur özniteliği kalkıp değerler ona yazılıyordu
+  (yeni dosya hiç çekilmeden); check-in ise `E_EDM_FILE_NOT_LOCKED_BY_YOU` ile düşüyordu.
+  Artık her PDM çağrısından önce dosyanın dışa aktarımdaki klasöründe hâlâ bulunduğu
+  doğrulanıyor (`PdmFileLookup`); bulunamayan dosyanın satırları önizlemede
+  "Dosya bulunamadı" olarak engelleniyor.
+
 ## [1.1.0] — 2026-09-20 (eklenti güncellendi: 6)
 
 ### Eklendi

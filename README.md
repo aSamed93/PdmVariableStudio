@@ -196,20 +196,3 @@ dotnet test tests/PdmVariableStudio.Tests -c Debug
 | [docs/WORKBOOK-CONTRACT.md](docs/WORKBOOK-CONTRACT.md) | `.xlsx` formatının tam tanımı ve "kullanıcı şunu yaparsa ne olur" tablosu |
 | [docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md) | Kurulum adımları ve kabul kontrol listeleri |
 | [docs/SPIKE-PHASE0.md](docs/SPIKE-PHASE0.md) | Gerçek vault'ta doğrulanan PDM API davranışları |
-
-## Bilinen sınır: Phase 0 doğrulaması
-
-Bazı PDM API davranışları resmî dokümantasyondan teyit edilemedi (`help.solidworks.com` bu
-makineden HTTP 403 döndürüyor). Kullanılan API'lerin **imzaları** interop derlemesi üzerinde
-reflection ile doğrulandı; teyit edilemeyen **davranışlar** gerçek bir vault'ta ölçüldü ve
-sonuçları [docs/SPIKE-PHASE0.md](docs/SPIKE-PHASE0.md) içine yazıldı.
-
-Veri bütünlüğüne dokunan maddelerin tamamı doğrulanmış durumda. Açık kalan üç madde yalnızca
-performans ve tazeleme davranışıyla ilgili; hiçbiri sessiz veri kaybı riski taşımıyor.
-
-## Sonraya bırakılanlar
-
-MVP kapsamı dışında bilinçli olarak bırakılanlar: redo, eşzamanlı yazmaya dayanıklı
-merkezî işlem günlüğü (paylaşıma yönlendirme var, kilitleme yok), kod imzası, İngilizce
-arayüz, zamanlanmış dışa aktarım, BOM düzenleme, vault'lar arası göç, web arayüzü,
-`IEdmBatchListing4` ile hızlandırılmış okuma yolu (önce ölçüm gerekiyor).

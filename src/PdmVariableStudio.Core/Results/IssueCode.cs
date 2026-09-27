@@ -134,7 +134,10 @@ public static class IssueText
             "yeniden yükleyin.",
 
         IssueCode.FileNotFound =>
-            "Dosya vault'ta bulunamadı; dışa aktarımdan sonra silinmiş olabilir.",
+            "Dosya vault'ta, dışa aktarımdaki klasöründe bulunamadı. Dışa aktarımdan sonra " +
+            "silinmiş, taşınmış ya da silinip yeniden eklenmiş olabilir — yeniden eklenen dosya " +
+            "yeni bir kimlik alır ve eski çalışma kitabı onu tanımaz. Yanlış dosyaya yazmamak " +
+            "için satır atlandı; klasörü yeniden dışa aktarın.",
         IssueCode.FolderNotFound =>
             "Klasör vault'ta bulunamadı; dışa aktarımdan sonra silinmiş ya da taşınmış olabilir.",
         IssueCode.VariableNotFound =>

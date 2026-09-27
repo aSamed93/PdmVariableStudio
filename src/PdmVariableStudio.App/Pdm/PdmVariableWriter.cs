@@ -55,14 +55,14 @@ internal sealed class PdmVariableWriter : IPdmVariableWriter
 
         try
         {
-            if (_vault.GetObject(EdmObjectType.EdmObject_File, file.FileId) is not IEdmFile5 pdmFile)
+            // Ölü bir kimlik, aynı yerel yoldaki BAŞKA bir dosyanın kopyasına yazdırır.
+            // Bkz. PdmFileLookup.
+            var pdmFile = PdmFileLookup.GetLiveFile(_vault, file, scope);
+            if (pdmFile is null)
             {
                 return OperationOutcome<IReadOnlyList<VariableWriteResult>>.Failure(
                     IssueCode.FileNotFound, file.ToString());
             }
-
-            scope.Track(pdmFile);
-            pdmFile.Refresh();
 
             if (!pdmFile.IsLocked)
             {

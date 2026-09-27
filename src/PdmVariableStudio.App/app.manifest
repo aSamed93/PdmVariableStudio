@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <assembly manifestVersion="1.0" xmlns="urn:schemas-microsoft-com:asm.v1">
-  <assemblyIdentity version="1.1.0.0" name="PdmVariableStudio.app" />
+  <assemblyIdentity version="1.1.1.0" name="PdmVariableStudio.app" />
 
   <!-- DPI farkindaligi: PDM Explorer yuksek DPI ekranlarda calisiyor ve bulanik bir
        pencere kullaniciya "bu ayri bir uygulama" hissini kotu bir bicimde veriyor. -->

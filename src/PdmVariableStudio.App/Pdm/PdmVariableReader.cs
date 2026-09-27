@@ -94,13 +94,13 @@ internal sealed class PdmVariableReader : IPdmVariableReader
 
         try
         {
-            if (_vault.GetObject(EdmObjectType.EdmObject_File, file.FileId) is not IEdmFile5 pdmFile)
+            // Silinmiş ya da taşınmış bir dosyanın nesnesi de döner; okuma onun (boş) değerlerini
+            // "güncel" sanıp her hücreyi güvenli değişiklik gösterirdi. Bkz. PdmFileLookup.
+            var pdmFile = PdmFileLookup.GetLiveFile(_vault, file, scope);
+            if (pdmFile is null)
             {
                 return OperationOutcome<PdmFileSnapshot>.Failure(IssueCode.FileNotFound, file.ToString());
             }
-
-            scope.Track(pdmFile);
-            pdmFile.Refresh();
 
             var checkout = ReadCheckoutState(pdmFile);
             var hasPermission = ReadWritePermission(file, scope);
