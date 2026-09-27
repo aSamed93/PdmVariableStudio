@@ -910,6 +910,11 @@ faq = [
       "başka bir vault'tan veya uyumsuz bir sürümden geliyor. Yeniden dışa aktarıp "
       "değişikliklerinizi yeni dosyaya taşıyın. Reddedilen dosyadan PDM'ye <b>hiçbir şey "
       "yazılmaz</b>."]),
+    ("Önizlemede satırlar “Dosya bulunamadı” ile engellendi.",
+     ["Dosya dışa aktarımdan sonra silinmiş, başka klasöre taşınmış ya da silinip aynı adla "
+      "<b>yeniden eklenmiş</b>. Yeniden eklenen dosya PDM'de yeni bir kimlik alır; eski "
+      "çalışma kitabı onu tanımaz. Yanlış dosyaya yazmamak için bu satırlar bilerek "
+      "atlanır. Klasörü yeniden dışa aktarıp değişikliklerinizi yeni dosyaya taşıyın."]),
     ("Bir dosya için “özel olarak açık” / kilitli hatası.",
      ["Dosya SOLIDWORKS'te ya da başka bir programda açık. Kapatıp o dosya için yeniden "
       "uygulayın; diğer dosyalar etkilenmez."]),
