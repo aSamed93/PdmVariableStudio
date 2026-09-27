@@ -189,6 +189,43 @@ public class RoundTripTests : IDisposable
         Assert.Equal(1, changeSet.BlockedFileCount);
     }
 
+    /// <summary>
+    /// Gerçek vault'ta yaşandı (2026-09-27): klasördeki dosyalar silinip aynı adla yeniden
+    /// eklendi, yeni kimlik aldılar; ardından ESKİ çalışma kitabı içe aktarıldı. Ölü kimliğin
+    /// okunamaması "güncel = orijinal" sayılıyor, her hücre güvenli değişiklik görünüyordu ve
+    /// uygulama aynı yerel yoldaki yeni dosyanın kopyasına yazıyordu.
+    /// </summary>
+    [Fact]
+    public void DosyaSilinipYenidenEklendiyse_EskiKitapYeniDosyayaYazmaz()
+    {
+        ExportToWorkbook();
+        SetCell(row: 2, column: WorkbookSchema.FirstVariableColumn, "Ç4140");
+
+        // Dosya silindi ve aynı adla, aynı klasöre yeniden eklendi: yeni kimlik #99.
+        _vault.RemoveFile(_mil);
+        var yeniMil = _vault.AddFile(99, 10, "MIL-001.sldprt", ConfigurationKey.FileLevel).Identity;
+        _vault.SetValue(yeniMil, ConfigurationKey.FileLevel, Material, VariableValue.FromText("Ç1040"));
+
+        var changeSet = _import.BuildChangeSet(_workbookPath).Value;
+
+        var cell = changeSet.Cells.Single(c =>
+            c.Coordinate.File.FileId == 1
+            && c.Coordinate.Configuration.IsFileLevel
+            && c.Variable.VariableId == Material.VariableId);
+
+        Assert.False(cell.CanApply);
+        Assert.Equal(IssueCode.FileNotFound, cell.Reason);
+        Assert.Equal(1, changeSet.BlockedFileCount);
+        Assert.Contains(changeSet.Issues, i => i.Code == IssueCode.FileNotFound);
+
+        var result = _apply.Apply(changeSet, new ApplyOptions { CheckoutConsent = true });
+
+        Assert.True(result.IsFailure);
+        Assert.Empty(_vault.CheckedOutFileIds);
+        Assert.Equal(0, _vault.WriteCallCount);
+        Assert.Equal("Ç1040", _vault.GetValue(yeniMil, ConfigurationKey.FileLevel, Material).ToStorageString());
+    }
+
     [Fact]
     public void SayisalAlanaGecersizDegerYazilirsa_UygulanmazDigerleriEtkilenmez()
     {

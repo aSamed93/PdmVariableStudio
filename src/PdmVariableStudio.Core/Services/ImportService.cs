@@ -99,13 +99,37 @@ public sealed class ImportService
             }
         }
 
+        // Değişmiş görünüp okunamayan dosyalar: silinmiş, taşınmış ya da silinip yeniden
+        // eklenmiş (yeni kimlik almış) olabilir. Bunlar için "güncel değer = orijinal"
+        // varsayımı yapılamaz — yapılırsa her hücre güvenli değişiklik görünür ve ölü bir
+        // kimliğe yazılmaya çalışılır.
+        var missing = new HashSet<PdmFileIdentity>();
+        foreach (var file in touchedFiles)
+        {
+            if (!snapshots.ContainsKey(file))
+            {
+                missing.Add(file);
+            }
+        }
+
+        if (missing.Count > 0)
+        {
+            _log.Warn($"{missing.Count} dosya vault'ta dışa aktarımdaki klasöründe bulunamadı; " +
+                      "satırları uygulanmayacak.");
+        }
+
         cancellationToken.ThrowIfCancellationRequested();
 
         // 7-11. adımlar: karşılaştırma, yetki/kilit, uygulanabilirlik.
         progress?.Report("Değişiklikler karşılaştırılıyor");
         var issues = new List<ValidationIssue>(workbook.Issues);
-        var cells = BuildCells(workbook, snapshots, issues, cancellationToken);
-        var plans = BuildFilePlans(cells, snapshots);
+        foreach (var file in missing)
+        {
+            issues.Add(ValidationIssue.Error(IssueCode.FileNotFound, file.FileName));
+        }
+
+        var cells = BuildCells(workbook, snapshots, missing, issues, cancellationToken);
+        var plans = BuildFilePlans(cells, snapshots, missing);
 
         var changeSet = new ChangeSet(
             _vault.Vault, workbook.ExportSessionId, workbookPath, cells, plans, issues);
@@ -165,6 +189,7 @@ public sealed class ImportService
     private List<CellChange> BuildCells(
         ImportedWorkbook workbook,
         IReadOnlyDictionary<PdmFileIdentity, PdmFileSnapshot> snapshots,
+        ISet<PdmFileIdentity> missing,
         List<ValidationIssue> issues,
         CancellationToken cancellationToken)
     {
@@ -175,7 +200,8 @@ public sealed class ImportService
             cancellationToken.ThrowIfCancellationRequested();
 
             snapshots.TryGetValue(row.File, out var snapshot);
-            var context = BuildWriteContext(row.File, snapshot);
+            var isMissing = missing.Contains(row.File);
+            var context = isMissing ? WriteContext.Missing : BuildWriteContext(row.File, snapshot);
 
             foreach (var issue in row.Issues)
             {
@@ -253,7 +279,8 @@ public sealed class ImportService
     /// </summary>
     private static List<FileApplyPlan> BuildFilePlans(
         IReadOnlyList<CellChange> cells,
-        IReadOnlyDictionary<PdmFileIdentity, PdmFileSnapshot> snapshots)
+        IReadOnlyDictionary<PdmFileIdentity, PdmFileSnapshot> snapshots,
+        ISet<PdmFileIdentity> missing)
     {
         var plans = new Dictionary<PdmFileIdentity, FileApplyPlan>();
 
@@ -263,6 +290,14 @@ public sealed class ImportService
 
             if (!plans.TryGetValue(file, out var plan))
             {
+                if (missing.Contains(file))
+                {
+                    plan = new FileApplyPlan(file, CheckoutState.Unknown, CheckoutAction.Blocked, IssueCode.FileNotFound);
+                    plans[file] = plan;
+                    plan.Cells.Add(cell);
+                    continue;
+                }
+
                 // Anlık görüntü yoksa bu dosyaya HİÇ gidilmemiştir: kullanıcı onun hiçbir
                 // değerine dokunmamış. Böyle bir dosya ne çekilir ne de engellenir —
                 // "durum bilinmiyor"u engel saymak, değişmemiş yüzlerce dosyayı önizlemede

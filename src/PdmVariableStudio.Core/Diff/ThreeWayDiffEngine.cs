@@ -17,6 +17,13 @@ public sealed class WriteContext
     public static readonly WriteContext Writable =
         new(CheckoutState.NotCheckedOut, hasWritePermission: true, fileExists: true);
 
+    /// <summary>
+    /// Dosya vault'ta, dışa aktarımdaki klasöründe yok: silinmiş, taşınmış ya da silinip
+    /// yeniden eklenmiş (yeni kimlik almış). Hiçbir hücresi yazılamaz.
+    /// </summary>
+    public static readonly WriteContext Missing =
+        new(CheckoutState.Unknown, hasWritePermission: false, fileExists: false);
+
     public WriteContext(CheckoutState checkout, bool hasWritePermission, bool fileExists = true)
     {
         Checkout = checkout ?? CheckoutState.Unknown;
