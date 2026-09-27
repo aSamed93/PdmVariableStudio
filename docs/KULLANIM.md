@@ -197,6 +197,12 @@ diyebilirsiniz.
 Yeniden dışa aktarıp değişiklikleri o dosyaya taşıyın. Reddedilen dosyadan PDM'ye hiçbir
 şey yazılmaz.
 
+**Önizlemede satırlar "Dosya bulunamadı" ile engellendi.**
+Dosya dışa aktarımdan sonra silinmiş, başka klasöre taşınmış ya da silinip aynı adla
+yeniden eklenmiş. Yeniden eklenen dosya PDM'de yeni bir kimlik alır; eski çalışma kitabı onu
+tanımaz. Yanlış dosyaya yazmamak için bu satırlar bilerek atlanır. Klasörü yeniden dışa
+aktarıp değişiklikleri yeni dosyaya taşıyın.
+
 **Bir dosya "özel olarak açık" hatası veriyor.**
 Dosya SOLIDWORKS'te açık. Kapatıp o dosya için tekrar uygulayın; diğer dosyalar etkilenmez.
 
