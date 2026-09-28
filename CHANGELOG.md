@@ -4,7 +4,7 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/), sürümleme
 [SemVer](https://semver.org/lang/tr/). Uygulama sürümü ile eklenti sürümü ayrıdır; eklentiyi
 yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir.
 
-## [Yayımlanmadı]
+## [1.2.0] — 2026-09-28
 
 ### Eklendi
 - **Montajdan Ekle:** bir montaj seçilir, konfigürasyonu sorulur; montajın bütün bileşenleri
@@ -13,6 +13,11 @@ yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir
   olur. Çalışma kitabına *Üst montaj*, *Seviye* ve *Adet* bilgi sütunları eklenir (adetler
   alt montajlar boyunca çarpılır, aynı parça birden fazla yerde geçse de tek satırdır).
   Şema sürümü değişmedi; eklenti değişmedi.
+- **Kurulum dosyası** (`PdmVariableStudio-Setup-1.2.0.exe`, Inno Setup): PDM istemcisini
+  denetler, .NET Framework 4.8.1 eksikse kurar, uygulamayı kurup kayıt defteri değerini
+  yazar, eklentinin iki dosyasını `AddIn\` klasörüne hazırlar. `EPDM.Interop.epdm.dll`
+  kuruluma girmez; hedef makinedeki PDM istemcisinden kopyalanır. Zip paketi de
+  yayımlanmaya devam ediyor.
 
 ## [1.1.1] — 2026-09-27
 

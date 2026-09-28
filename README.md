@@ -145,7 +145,9 @@ Son işlemler, geri alma önizlemesi, geri al.
 Son kullanıcı için adım adım anlatım ve sorun giderme:
 **[Kurulum ve Kullanım Kılavuzu (PDF)](docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf)** ya da
 kısa hâli **[docs/KULLANIM.md](docs/KULLANIM.md)**.
-Hazır paket: [Releases](https://github.com/aSamed93/PdmVariableStudio/releases).
+Hazır paket: [Releases](https://github.com/aSamed93/PdmVariableStudio/releases) — en kolayı
+**`PdmVariableStudio-Setup-x.y.z.exe`** (PDM istemcisini denetler, gerekirse .NET 4.8.1'i kurar,
+eklenti dosyalarını `AddIn\` klasörüne hazırlar). Zip paketi de yayımlanır.
 
 Kaynaktan: iki ayrı paket var, uygulama diske kurulur, eklentinin **iki DLL'i** vault'a
 yüklenir.
@@ -158,7 +160,9 @@ powershell -ExecutionPolicy Bypass -File docs\install-app.ps1
 
 Yayım paketi üretmek: `powershell -ExecutionPolicy Bypass -File docs\package-release.ps1`
 (`artifacts\` altına zip + SHA-256; `EPDM.Interop.epdm.dll` bilerek pakete girmez,
-kurulum betiği onu PDM istemcisinden kopyalar).
+kurulum betiği onu PDM istemcisinden kopyalar). Kurulum dosyası:
+`powershell -ExecutionPolicy Bypass -File docs\build-installer.ps1` (Inno Setup 6 gerekir;
+`installer\PdmVariableStudio.iss`).
 
 Ardından `src\PdmVariableStudio.AddIn\bin\Release\net481\` altındaki **iki dosyayı**
 (`PdmVariableStudio.AddIn.dll` ve `EPDM.Interop.epdm.dll`) Administration → Add-ins ile

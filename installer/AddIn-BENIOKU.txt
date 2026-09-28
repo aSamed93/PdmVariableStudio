@@ -1,0 +1,25 @@
+PDM Variable Studio — eklenti dosyaları
+=======================================
+
+Bu klasördeki İKİ dosya PDM vault'una BİRLİKTE yüklenir. Bu adım PDM yöneticisinindir
+ve vault başına bir kez yapılır:
+
+  1. PDM Administration'ı açın, vault'a giriş yapın.
+  2. Add-ins → sağ tık → New Add-in…
+  3. Dosya penceresinde bu klasöre gelin ve Ctrl ile İKİSİNİ birden seçin:
+         PdmVariableStudio.AddIn.dll
+         EPDM.Interop.epdm.dll
+  4. Tamam → eklenti listede görünür.
+  5. TÜM PDM Explorer ve Administration pencerelerini kapatıp yeniden açın.
+
+Neden iki dosya?
+  Eklenti PDM'nin kendi kütüphanesine (EPDM.Interop.epdm.dll) ihtiyaç duyar ve PDM,
+  vault'a yüklenen eklentiyi ayrı bir klasörden çalıştırdığı için o kütüphaneyi orada
+  bulamaz. Tek dosya yüklenirse PDM yanıltıcı bir hata verir:
+  "... is not a multi-threaded COM-server" — ve eksik dosyayı SÖYLEMEZ.
+
+Sürüm yükseltirken:
+  Yalnızca sürüm notunda "eklenti güncellendi" yazıyorsa bu adımı tekrarlayın
+  (eklentiyi seçip Update ile aynı iki dosya). Uygulama güncellemeleri için gerekmez.
+
+Ayrıntı: bir üst klasördeki KULLANIM.md
