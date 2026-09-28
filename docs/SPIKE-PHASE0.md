@@ -3,6 +3,11 @@
 Bu belge bir **kapıdır**. Aşağıdaki maddelerin tamamı gerçek bir **test vault'unda**
 doğrulanmadan eklenti üretim vault'una kurulmamalıdır.
 
+> **Durum (2026-09-28):** Veri bütünlüğüne dokunan maddelerin tamamı doğrulandı. Açık
+> kalanlar yalnızca performans ve tazeleme: 4 (okuma yolu), 7'nin check-in kapalı senaryosu
+> ve 9'un 100+ dosya ölçümü. Kodda `PHASE 0'DA DOĞRULANACAK` işareti artık tek yerde:
+> `App/Pdm/PdmVariableReader.cs` (madde 4).
+
 Gerekçe: `help.solidworks.com` bu makineden HTTP 403 döndürüyor ve yerel `API_GB.chm`
 plan aşamasında açılamadı. Kodda kullanılan API'lerin **imzaları** interop derlemesi üzerinde
 reflection ile doğrulandı, ancak bazı **davranışlar** doğrulanamadı. Bu maddeler kodda
@@ -23,9 +28,9 @@ Sonuçları bu belgeye yazın. Bir madde `❌` çıkarsa, ilgili kod yorumundaki
 | 4 | `GetVarFromDb` ile `GetVar` farkı | `App/Pdm/PdmVariableReader.cs` | ⬜ |
 | 5 | `SetVar` 4. parametresi (`false` doğru çalışıyor) | `App/Pdm/PdmVariableWriter.cs` | ✅ pratikte doğrulandı |
 | 6 | `HasRightsEx` hak kapsamları | `App/Pdm/PdmVariableReader.cs` | ✅ **doğrulandı** |
-| 7 | `Flush()` sonrası Explorer kart tazeleme | — | ⬜ |
+| 7 | `Flush()` sonrası Explorer kart tazeleme | — | 🟡 check-in ile doğrulandı; check-in kapalıyken denenmedi |
 | 8 | Komutun menülerde görünmesi | `AddIn/VariableStudioAddIn.cs` | ✅ **doğrulandı** |
-| 9 | Ölçüm: 10 / 100 / 1.000 dosya süresi | — | ⬜ |
+| 9 | Ölçüm: 10 / 100 / 1.000 dosya süresi | — | 🟡 14 dosya ölçüldü; 100+ bekliyor |
 
 ---
 
@@ -225,6 +230,13 @@ başarısız olduğunu sanar.
 **Nasıl doğrulanır:** Uygulamadan sonra Explorer'da dosyanın kart sekmesine bakın.
 Tazelenmiyorsa F5 / klasör değiştirip dönme ile tazelenip tazelenmediğine bakın.
 
+**Durum (2026-09-27, 🟡 kısmen):** "İşlem sonunda check-in edilsin" **açıkken** doğrulandı:
+TEKYAZ\Nemo'da 14 dosyaya 390 değer uygulandıktan sonra Explorer'da dosya seçildiğinde veri
+kartı ve Bill of Materials sekmesi yeni değerleri gösterdi; geri almadan sonra eski değerlere
+döndü. Check-in yeni bir sürüm ürettiği için Explorer bunu kendiliğinden alıyor.
+**Açık kalan:** check-in **kapalıyken** (dosya kullanıcıda çekili kalırken) kartın tazelenip
+tazelenmediği.
+
 **❌ ise:** `IEdmVault5.RefreshFolder` ya da `EdmRefreshFlag` ile bir tazeleme çağrısı
 eklenir. (Toplulukta bunların "beklendiği gibi çalışmadığı" bildirilmiş; bu yüzden MVP'ye
 konmadı, önce ölçülecek.)
@@ -266,15 +278,22 @@ Süzgeçler (`OnlyFolders` vb.) **kullanılmıyor**; hangi bağlamdan gelindiği
 
 **Kontrol listesi:**
 
-- [ ] Klasör ağacında klasöre sağ tık → **PDM Variable Studio** görünüyor
-- [ ] Dosya listesinde bir klasöre sağ tık → görünüyor
-- [ ] Bir dosyaya sağ tık → görünüyor ve **dosyanın bulunduğu klasörle** açılıyor
-- [ ] Araçlar menüsünden erişilebiliyor
-- [ ] Uygulama doğru klasörle açılıyor (üst şeritteki klasör yolunu kontrol edin)
-- [ ] Uygulama kurulu değilse, nereye kurulması gerektiğini söyleyen mesaj çıkıyor
-- [ ] Pencere kapanıp tekrar açılabiliyor
-- [ ] Explorer kapatılıp açıldığında çökme yok
-- [ ] Administration'dan eklenti kaldırıldığında Explorer sağlıklı kalıyor
+Kanıt: `studio.log` (2026-09-20 → 2026-09-27) ve 2026-09-27 ekran kayıtları.
+
+- [ ] Klasör ağacında klasöre sağ tık → **PDM Variable Studio** görünüyor — *günlük ağaç ile
+  listeyi ayırt etmiyor; ayrıca denenmeli*
+- [x] Dosya listesinde bir klasöre sağ tık → görünüyor (`Seçili klasör: Nemo (#3)`; kayıtta
+  görüldü)
+- [x] Bir dosyaya sağ tık → görünüyor ve **dosyanın bulunduğu klasörle** açılıyor
+  (`veri sayısı: 14` → `Seçili dosyanın klasörü kullanılıyor: Nemo (#3)`)
+- [x] Araçlar menüsünden erişilebiliyor (`veri sayısı: 0` → `klasör uygulamada seçilecek`)
+- [x] Uygulama doğru klasörle açılıyor (`--folder 3` → arayüzde `Klasör: \Nemo`)
+- [x] Uygulama kurulu değilse, nereye kurulması gerektiğini söyleyen mesaj çıkıyor
+  (`Uygulama bulunamadı; beklenen konumlar kullanıcıya bildirildi.`)
+- [x] Pencere kapanıp tekrar açılabiliyor (aynı gün içinde 20'den fazla başlatma)
+- [x] Explorer kapatılıp açıldığında çökme yok (eklentinin 5. ve 6. sürümleriyle 20'den fazla
+  yeniden yükleme; hata kaydı yok)
+- [ ] Administration'dan eklenti kaldırıldığında Explorer sağlıklı kalıyor — *denenmedi*
 
 Günlükte her adım görünür (`[eklenti]` etiketiyle):
 
@@ -296,9 +315,21 @@ aşılırsa Phase 9'daki `IEdmBatchListing4` hızlı okuma yolu değerlendirilir
 
 | Dosya sayısı | Değişken sayısı | Tarama | Değer okuma | Excel yazma | Toplam |
 |---|---|---|---|---|---|
-| 10 | | | | | |
+| 14 (TEKYAZ, 2026-09-27) | 18 | 0,04–0,11 sn | 0,44 sn | 0,31 sn | **0,76 sn** |
 | 100 | | | | | |
 | 1.000 | | | | | |
 | 3.000 | | | | | |
 
 Süreler `studio.log` içindeki zaman damgalarından okunabilir.
+
+**Uygulama ve geri alma** (dosya başına check-out → yazma → check-in):
+
+| Dosya sayısı | Hücre | İşlem | Süre | Dosya başına |
+|---|---|---|---|---|
+| 14 (TEKYAZ, 2026-09-27) | 390 | Uygula | 22,4 sn | **~1,6 sn** |
+| 14 (TEKYAZ, 2026-09-27) | 378 | Geri al | 21,4 sn | **~1,5 sn** |
+
+Süreyi hücre sayısı değil **dosya sayısı** belirliyor: her dosya için check-out, `Flush()` ve
+check-in birer PDM turu. Bu hızla 1.000 dosya yaklaşık **27 dakika** sürer; darboğaz okuma
+değil yazma. Yazma stratejisi bilinçli seçildi (bkz. `CLAUDE.md` → "Yazma stratejisi");
+hızlandırma ancak toplu check-out/check-in ile mümkün ve önce ölçülmeli.

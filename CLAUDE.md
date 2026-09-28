@@ -294,9 +294,9 @@ Bu dosyalar `.gitignore` ile depo dışında tutulur (`studio.log`, `*.xlsx`, `s
 ## Doğrulanmamış API davranışları
 
 Bazı PDM davranışları dokümantasyondan teyit edilemedi (help.solidworks.com bu makineden 403
-döndürüyor). Kodda `PHASE 0'DA DOĞRULANACAK` yorumuyla işaretliler (şu an üç yer:
-`App/Pdm/PdmVariableReader.cs`, `App/Pdm/PdmVariableWriter.cs`, `App/Threading/PdmWorkQueue.cs`)
-ve her biri **tek bir yerde** toplandı.
+döndürüyor). Kodda `PHASE 0'DA DOĞRULANACAK` yorumuyla işaretliler (şu an tek yer:
+`App/Pdm/PdmVariableReader.cs` — `GetVarFromDb` okuma yolu; diğerleri gerçek vault'ta
+doğrulandı) ve her biri **tek bir yerde** toplandı.
 
 **Gerçek vault'ta doğrulanmadan üretime kurmayın:**
 [docs/SPIKE-PHASE0.md](docs/SPIKE-PHASE0.md).

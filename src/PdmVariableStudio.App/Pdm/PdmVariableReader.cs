@@ -24,8 +24,11 @@ namespace PdmVariableStudio.App.Pdm;
 /// <b>GetVarFromDb tercih ediliyor.</b> <c>GetVar</c> değeri dosyanın yerel önbelleğinden
 /// okumaya çalışabiliyor ve bu, yerel kopyası olmayan dosyalarda ağdan çekme tetikleyerek
 /// taramayı dakikalara çıkarabiliyor. <c>GetVarFromDb</c> doğrudan veritabanından okur.
-/// <b>PHASE 0'DA DOĞRULANACAK:</b> ikisinin dönen değerleri ve hızları gerçek vault'ta
-/// karşılaştırılacak; fark beklendiği gibi değilse <see cref="PreferDatabaseRead"/> kapatılır.
+/// <b>PHASE 0'DA DOĞRULANACAK (açık kalan tek madde, docs/SPIKE-PHASE0.md madde 4):</b>
+/// ikisinin dönen değerleri ve hızları, yerel kopyası OLMAYAN bir klasörde karşılaştırılacak;
+/// fark beklendiği gibi değilse <see cref="PreferDatabaseRead"/> kapatılır. Yerel kopyası olan
+/// 14 dosyada okuma doğru değerleri döndürdü ve 0,44 sn sürdü; asıl soru, yerel kopya yokken
+/// ağdan dosya çekilip çekilmediği.
 /// </para>
 /// </remarks>
 internal sealed class PdmVariableReader : IPdmVariableReader
