@@ -310,8 +310,7 @@ Günlükte her adım görünür (`[eklenti]` etiketiyle):
 
 ## 9. Ölçüm
 
-Aşağıdaki tabloyu gerçek vault'ta doldurun. Tasarım 1.000 dosya için makul süre hedefliyor;
-aşılırsa Phase 9'daki `IEdmBatchListing4` hızlı okuma yolu değerlendirilir.
+Aşağıdaki tabloyu gerçek vault'ta doldurun. Tasarım 1.000 dosya için makul süre hedefliyor.
 
 | Dosya sayısı | Değişken sayısı | Tarama | Değer okuma | Excel yazma | Toplam |
 |---|---|---|---|---|---|
