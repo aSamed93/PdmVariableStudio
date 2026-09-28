@@ -691,7 +691,7 @@ story.append(table([
 
 story.append(H2("4.3 Dışa aktarma", "s4-3"))
 story.append(H3("1. Dosyaları toplayın", "s4-3a"))
-story.append(P("Üç kaynak düğmesi aynı listeye ekler; bunları karışık kullanabilirsiniz. "
+story.append(P("Dört kaynak düğmesi aynı listeye ekler; bunları karışık kullanabilirsiniz. "
                "Aynı dosya iki kez eklenmez; <b>Kaynak</b> sütunu her satırın nereden geldiğini gösterir."))
 story.append(table([
     ["Düğme", "Ne yapar"],
@@ -700,6 +700,11 @@ story.append(table([
     ["<b>Dosya Ekle…</b>", "PDM'in dosya seçme penceresi; birden fazla dosya seçebilirsiniz."],
     ["<b>Ara ve Ekle…</b>", "Dosya adı desenine (ör. " + c("*.sldprt") + ", " + c("MIL-*")
      + ") ve/veya bir kart değişkeninin değerine göre PDM'de arar, sonuçları ekler."],
+    ["<b>Montajdan Ekle…</b>", "Bir montaj seçip konfigürasyonunu belirlersiniz; montajın "
+     "bütün bileşenleri (istenirse alt montajların içindekiler de) farklı klasörlerde olsalar "
+     "bile eklenir. Her parça için yalnızca <b>montajın kullandığı konfigürasyon</b> ve "
+     + c("@") + " satırı gelir. Excel'de <b>Üst montaj</b>, <b>Seviye</b> ve <b>Adet</b> "
+     "sütunları görünür; bunlar yalnızca bilgi amaçlıdır, PDM'ye yazılmaz."],
     ["<b>Seçilenleri Sil</b> / <b>Listeyi Temizle</b>", "İşaretlediğiniz satırları ya da "
      "listenin tamamını çıkarır."],
 ], [0.3, 0.7]))

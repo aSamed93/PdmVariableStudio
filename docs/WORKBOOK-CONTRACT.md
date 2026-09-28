@@ -39,6 +39,29 @@ Kaynak: [`src/PdmVariableStudio.Core/Workbook/WorkbookSchema.cs`](../src/PdmVari
 | 3 | `GOVDE.sldasm` | `\Assemblies` | `@` | Gövde | | | | B |
 | 4 | `sartname.docx` | `\Docs` | `@` | Şartname | | | | |
 
+### Montaj bilgi sütunları
+
+Dosyalar **Montajdan Ekle** ile eklendiyse `Konfigürasyon` ile ilk değişken sütunu arasına üç
+bilgi sütunu girer ve değişken sütunları o kadar sağa kayar:
+
+| Sütun | Başlık | Kilit | Not |
+|---|---|---|---|
+| E | `Montaj: Üst montaj` | kilitli | doğrudan üst montajın dosya adı; kök montajda boş |
+| F | `Montaj: Seviye` | kilitli | 0 = kök montaj, 1 = doğrudan alt bileşen… |
+| G | `Montaj: Adet` | kilitli | kök montajın **bir** kopyası için toplam adet (yol boyunca çarpılmış) |
+| H… | değişken adları | düzenlenebilir | |
+
+- Yalnızca **gösterim** içindir: `_Rows`'a ve damgaya girmez, içe aktarımda okunmaz.
+  Şema sürümü bu yüzden değişmedi; eski sürümler bu kitapları okuyabilir.
+- Kayma okuyucuyu etkilemez: değişken sütunları sabit bir konumdan değil `_Metadata`'daki
+  `ColumnIndex` tablosundan bulunur (her zaman öyleydi).
+- Başlıklar `Montaj:` önekiyle başlar ki `Adet` gibi bir vault değişkeniyle çakışıp sütun
+  yeri kaymış bir değişken sanılmasın.
+- Montajdan gelen bir dosyada yalnızca **montajın kullandığı konfigürasyonlar** ve dosya
+  düzeyi (`@`) satır olur. Karışık listede montajdan gelmeyen satırların bilgi hücreleri boştur.
+- Aynı dosya montajda birden fazla yerde geçse de dosya × konfigürasyon başına **tek satır**
+  vardır; adetler toplanır.
+
 **`@` ne demek:** konfigürasyondan bağımsız, dosya düzeyindeki değer — SOLIDWORKS'teki
 **Custom** sekmesine karşılık gelir. Adlandırılmış konfigürasyonlar (`Uzun` gibi)
 **Configuration Specific** sekmelerine karşılık gelir ve PDM veri kartında `@` ile **ayrı
@@ -147,6 +170,7 @@ başka bir kitaba kopyalandığında damga tutmaz.
 | `_Rows` sayfasını sildi | **Kitap tamamen reddedilir** (snapshot olmadan karşılaştırma yapılamaz) |
 | `_Metadata` sayfasını sildi | **Kitap tamamen reddedilir** |
 | Başka vault'un kitabını yükledi | `WrongVault` — **kitap tamamen reddedilir** |
+| Montaj bilgi sütunlarını değiştirdi/sildi | Etkisiz — bu sütunlar okunmaz |
 | Sayfa korumasını kaldırdı | Etkisiz — doğrulama korumaya değil damgalara dayanıyor |
 
 Bu tablonun her satırının bir testi var: [`tests/Workbook/WorkbookContractTests.cs`](../tests/PdmVariableStudio.Tests/Workbook/WorkbookContractTests.cs).

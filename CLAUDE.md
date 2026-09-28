@@ -126,8 +126,9 @@ döner, süreç sonra sessizce ölür.
 ## Core'un iç akışı — birden çok dosyaya yayılan resim
 
 Core, PDM'yi yalnızca `Core/Abstractions/IPdmAbstractions.cs` içindeki arayüzler üzerinden
-görür: `IPdmVaultContext`, `IPdmFolderScanner`, `IPdmFileBrowser`, `IPdmVariableReader`,
-`IPdmVariableWriter`, `IPdmCheckoutService`, `IStudioLog` ve `IOperationJournal.cs`.
+görür: `IPdmVaultContext`, `IPdmFolderScanner`, `IPdmFileBrowser`, `IPdmAssemblyReader`,
+`IPdmVariableReader`, `IPdmVariableWriter`, `IPdmCheckoutService`, `IStudioLog` ve
+`IOperationJournal.cs`.
 İki gerçekleştirim vardır:
 
 - `App/Pdm/*` — gerçek interop (`PdmVaultContext`, `PdmVariableReader`, `PdmVariableWriter`,
@@ -200,6 +201,19 @@ hiç yapmamak yeğdir.
 Günlük `Core/Journal/JsonlOperationJournal.cs` içinde; vault başına bir klasör, işlem
 başına bir `.jsonl` dosyası ve bir indeks. JSON için dış bağımlılık yok — `FlatJson.cs`
 eldeki küçük yazıcı/okuyucu.
+
+### Montajdan dışa aktarım: referans ağacı, BOM şablonu değil
+
+`App/Pdm/PdmAssemblyReader.cs` bileşenleri `IEdmReference10` ağacından okur (dosya, klasör,
+montajın kullandığı konfigürasyon, adet — şablondan bağımsız). Ağacı dosya listesine çeviren
+saf hesap `Core/Services/AssemblyExpansion.cs` içinde ve PDM'siz test ediliyor: adetler yol
+boyunca **çarpılır**, aynı dosya × konfigürasyon **tek satır** olur, dosya düzeyi (`@`) satırı
+her zaman eklenir. `GetFirstChildPosition3`'e **boş konfigürasyon vermeyin** — her bileşen
+`"@"` döner (bkz. [docs/SPIKE-PHASE0.md](docs/SPIKE-PHASE0.md) madde 10).
+
+Excel'deki *Üst montaj / Seviye / Adet* sütunları yalnızca gösterimdir; değişken sütunlarını
+kaydırırlar ama okuyucu sütunları `_Metadata`'daki `ColumnIndex`'ten bulduğu için şema
+sürümü değişmedi. Okuyucuya "değişkenler 5. sütundan başlar" varsayımı **eklemeyin**.
 
 ### Menü bayrağı: TEK bayrak, süzgeç yok
 

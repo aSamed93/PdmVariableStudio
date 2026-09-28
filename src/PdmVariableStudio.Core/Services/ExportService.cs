@@ -45,6 +45,14 @@ public sealed class ExportRequest
 
     /// <summary>Metadata'ya yazılır; kaynak klasör taramasında alt klasörlere inildi mi.</summary>
     public bool IncludeSubfolders { get; set; }
+
+    /// <summary>
+    /// Dosya başına dışa aktarım kapsamı. Kapsamı olmayan dosya tüm konfigürasyonlarıyla
+    /// aktarılır; montajdan gelen dosyada yalnızca montajın kullandığı konfigürasyonlar ve
+    /// dosya düzeyi satır olur (bkz. <see cref="FileExportScope"/>).
+    /// </summary>
+    public IReadOnlyDictionary<PdmFileIdentity, FileExportScope> Scopes { get; set; } =
+        new Dictionary<PdmFileIdentity, FileExportScope>();
 }
 
 /// <summary>Dışa aktarım akışı: klasör tara, değerleri oku, çalışma kitabı üret.</summary>
@@ -104,7 +112,7 @@ public sealed class ExportService
             return OperationOutcome<ExportSession>.Failure(read.Code, read.TechnicalDetail);
         }
 
-        var rows = BuildRows(read.Value, request.Variables, cancellationToken);
+        var rows = BuildRows(read.Value, request.Variables, request.Scopes, cancellationToken);
 
         var session = new ExportSession(
             Guid.NewGuid(),
@@ -126,16 +134,18 @@ public sealed class ExportService
     }
 
     /// <summary>
-    /// Her dosyanın her konfigürasyonu için bir satır üretir.
+    /// Her dosyanın her konfigürasyonu için bir satır üretir; kapsamı olan dosyada yalnızca
+    /// kapsamdaki konfigürasyonlar için.
     /// </summary>
     /// <remarks>
     /// Konfigürasyonlar AYRI satırlar olur; "tüm konfigürasyonlar" davranışı kullanıcı açıkça
     /// istemeden kullanılmaz. Bir dosyanın üç konfigürasyonuna aynı anda yazmak, kullanıcının
     /// yalnızca birini değiştirmek istediği durumda sessiz veri kaybıdır.
     /// </remarks>
-    private static List<ExportRow> BuildRows(
+    private List<ExportRow> BuildRows(
         IReadOnlyList<PdmFileSnapshot> snapshots,
         IReadOnlyList<PdmVariableDefinition> variables,
+        IReadOnlyDictionary<PdmFileIdentity, FileExportScope> scopes,
         CancellationToken cancellationToken)
     {
         var rows = new List<ExportRow>();
@@ -149,8 +159,19 @@ public sealed class ExportService
                 ? snapshot.Configurations
                 : new[] { ConfigurationKey.FileLevel };
 
+            scopes.TryGetValue(snapshot.Identity, out var scope);
+            if (scope is not null)
+            {
+                LogMissingConfigurations(snapshot, scope, configurations);
+            }
+
             foreach (var configuration in configurations)
             {
+                if (scope is not null && !scope.Includes(configuration))
+                {
+                    continue;
+                }
+
                 var values = new List<VariableValue>(variables.Count);
 
                 foreach (var variable in variables)
@@ -164,11 +185,45 @@ public sealed class ExportService
                     snapshot.Identity,
                     configuration,
                     snapshot.CurrentVersion,
-                    values));
+                    values,
+                    scope?.PlacementFor(configuration)));
             }
         }
 
         return rows;
+    }
+
+    /// <summary>
+    /// Montajın kullandığı ama dosyada artık bulunmayan konfigürasyonları günlüğe yazar.
+    /// </summary>
+    /// <remarks>
+    /// Montaj ağacı referansları okur; konfigürasyon parçada sonradan silinmiş ya da yeniden
+    /// adlandırılmış olabilir. O satır üretilmez — var olmayan bir konfigürasyona yazılamaz —
+    /// ama sessizce de kaybolmaz.
+    /// </remarks>
+    private void LogMissingConfigurations(
+        PdmFileSnapshot snapshot,
+        FileExportScope scope,
+        IReadOnlyList<ConfigurationKey> available)
+    {
+        foreach (var wanted in scope.Configurations)
+        {
+            var found = false;
+            foreach (var configuration in available)
+            {
+                if (configuration.Equals(wanted))
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found)
+            {
+                _log.Warn($"{snapshot.Identity}: montajın kullandığı '{wanted}' konfigürasyonu " +
+                          "dosyada bulunamadı; satırı üretilmedi.");
+            }
+        }
     }
 }
 

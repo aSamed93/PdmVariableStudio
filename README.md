@@ -125,8 +125,9 @@ Tek pencere, üç sekme.
 | **Klasör Ekle** | PDM'in klasör seçme penceresi; `Alt klasörler` işaretliyse ağacın tamamı |
 | **Dosya Ekle** | PDM'in kendi dosya seçme penceresi, çoklu seçim |
 | **Ara ve Ekle** | Dosya adı deseni ve/veya kart değerine göre PDM araması |
+| **Montajdan Ekle** | Bir montajın bileşenleri (alt montajlar dahil), yalnızca montajın kullandığı konfigürasyonlarla; Excel'e üst montaj, seviye ve adet sütunları eklenir |
 
-Üçü de **aynı listeye** eklenir; yinelenenler atlanır ve her satır hangi kaynaktan geldiğini
+Hepsi **aynı listeye** eklenir; yinelenenler atlanır ve her satır hangi kaynaktan geldiğini
 gösterir. Böylece farklı klasörlerden ve arama sonuçlarından tek bir işlem kümesi kurulabilir.
 
 Eklentiden bir klasöre sağ tıklayarak gelindiyse o klasörün dosyaları hazır gelir.

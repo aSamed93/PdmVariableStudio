@@ -85,10 +85,15 @@ pencerelerini kapatın, sonra açın. Aynı şey eklentiyi her güncellediğiniz
 
 ### Dışa Aktar sekmesi
 
-1. **Dosyaları toplayın.** Üç kaynak aynı listeye ekler; karışık kullanabilirsiniz:
+1. **Dosyaları toplayın.** Dört kaynak aynı listeye ekler; karışık kullanabilirsiniz:
    - **Klasör Ekle…** — PDM'nin klasör penceresi. *Alt klasörler* işaretliyse ağacın tamamı.
    - **Dosya Ekle…** — PDM'nin dosya penceresi, çoklu seçim.
    - **Ara ve Ekle…** — dosya adı deseni (`*.sldprt`, `MIL-*`) ve/veya bir değişkenin değeri.
+   - **Montajdan Ekle…** — bir montaj seçin, konfigürasyonunu belirleyin; montajın bütün
+     bileşenleri (istenirse alt montajların içindekiler de) farklı klasörlerde olsalar bile
+     eklenir. Her parça için yalnızca **montajın kullandığı konfigürasyon** ve `@` satırı
+     gelir. Excel'de *Üst montaj*, *Seviye* ve *Adet* sütunları görünür (yalnızca bilgi
+     amaçlı; PDM'ye yazılmaz).
 2. **Değişkenleri seçin.** Alttaki listeden gereksizleri kaldırın; dosya küçülür, Excel'de
    gezinmek kolaylaşır.
 3. **Dışa Aktar…** → `.xlsx` kaydedin. Ardından **Excel'de Aç** ile hemen düzenlemeye geçin.

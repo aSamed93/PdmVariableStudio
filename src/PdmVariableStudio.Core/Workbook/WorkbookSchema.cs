@@ -51,6 +51,32 @@ public static class WorkbookSchema
     public const string HeaderRelativePath = "Klasör";
     public const string HeaderConfiguration = "Konfigürasyon";
 
+    /// <summary>
+    /// Montajdan dışa aktarımda <see cref="ColConfiguration"/> ile ilk değişken sütunu arasına
+    /// giren bilgi sütunları: üst montaj, seviye, adet.
+    /// </summary>
+    /// <remarks>
+    /// <para>
+    /// Yalnızca GÖSTERİM içindir: kilitlidir, <c>_Rows</c>'a ve damgaya girmez, içe aktarımda
+    /// okunmaz. Bu yüzden şema sürümü değişmedi.
+    /// </para>
+    /// <para>
+    /// Değişken sütunları bu sütunlar kadar sağa kayar; okuyucu bundan etkilenmez, çünkü
+    /// değişken sütunlarını sabit bir konumdan değil <c>_Metadata</c>'daki
+    /// <c>ColumnIndex</c> tablosundan bulur. Eski sürümler de bu kitapları okuyabilir.
+    /// </para>
+    /// <para>
+    /// Başlıklar "Montaj:" önekiyle başlar ki bir vault değişkeninin görünen adıyla (ör.
+    /// "Adet") çakışıp sütun yeri kaymış bir değişken sanılmasın.
+    /// </para>
+    /// </remarks>
+    public static IReadOnlyList<string> AssemblyInfoHeaders { get; } = new[]
+    {
+        "Montaj: Üst montaj",
+        "Montaj: Seviye",
+        "Montaj: Adet",
+    };
+
     // --------------------------------------------------------------- _Rows sayfası
 
     public const int RowsColExportRowId = 1;

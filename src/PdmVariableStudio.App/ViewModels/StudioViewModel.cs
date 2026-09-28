@@ -122,6 +122,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     private IOperationJournal? _journal;
     private IPdmFolderScanner? _scanner;
     private IPdmFileBrowser? _browser;
+    private IPdmAssemblyReader? _assemblyReader;
 
     /// <summary>Ana pencerenin tanıtıcısı; PDM'in kendi iletişim kutularına ebeveyn olur.</summary>
     private IntPtr _windowHandle;
@@ -191,6 +192,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         AddFolderCommand = new RelayCommand(async () => await AddFolderAsync(), () => !IsBusy);
         AddFilesCommand = new RelayCommand(async () => await AddFilesAsync(), () => !IsBusy);
         SearchAndAddCommand = new RelayCommand(async () => await SearchAndAddAsync(), () => !IsBusy);
+        AddFromAssemblyCommand = new RelayCommand(async () => await AddFromAssemblyAsync(), () => !IsBusy);
         RemoveSelectedFilesCommand = new RelayCommand(RemoveSelectedFiles, () => !IsBusy && Files.Count > 0);
         ClearFilesCommand = new RelayCommand(ClearFiles, () => !IsBusy && Files.Count > 0);
 
@@ -498,6 +500,8 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
     public RelayCommand SearchAndAddCommand { get; }
 
+    public RelayCommand AddFromAssemblyCommand { get; }
+
     public RelayCommand RemoveSelectedFilesCommand { get; }
 
     public RelayCommand ClearFilesCommand { get; }
@@ -555,6 +559,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 var checkout = new PdmCheckoutService(_queue.Vault, reader, _log);
                 var scanner = new PdmFolderScanner(_queue.Vault, _log);
                 var browser = new PdmFileBrowser(_queue.Vault, _log);
+                var assemblyReader = new PdmAssemblyReader(_queue.Vault, _log);
                 var journal = new JsonlOperationJournal(_journalRoot.Path);
 
                 var apply = new ApplyService(vaultContext, reader, writer, checkout, journal, _log);
@@ -564,6 +569,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                     new ExportService(vaultContext, reader, _log),
                     scanner,
                     browser,
+                    assemblyReader,
                     new ImportService(vaultContext, reader, _log),
                     apply,
                     new UndoService(vaultContext, reader, journal, apply, _log),
@@ -581,6 +587,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             _exportService = setup.Export;
             _scanner = setup.Scanner;
             _browser = setup.Browser;
+            _assemblyReader = setup.AssemblyReader;
             _importService = setup.Import;
             _applyService = setup.Apply;
             _undoService = setup.Undo;
@@ -610,7 +617,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 // yerine kullanıcıyı kaynak düğmelerine yönlendiriyoruz — orada üç seçenek
                 // var ve hangisini isteyeceğini uygulama açılmadan bilemez.
                 StatusMessage = $"{Variables.Count} değişken bulundu. " +
-                                "Başlamak için Klasör Ekle, Dosya Ekle ya da Ara ve Ekle kullanın.";
+                                "Başlamak için Klasör Ekle, Dosya Ekle, Ara ve Ekle ya da Montajdan Ekle kullanın.";
             }
         }
         catch (Exception exception)
@@ -716,20 +723,65 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     /// </remarks>
     private int AddFiles(IReadOnlyList<PdmFileIdentity> files, FileSourceKind source)
     {
-        var existing = new HashSet<PdmFileIdentity>();
+        var existing = new Dictionary<PdmFileIdentity, FileRowViewModel>();
         foreach (var row in Files)
         {
-            existing.Add(row.File);
+            existing[row.File] = row;
         }
 
         var added = 0;
         foreach (var file in files)
         {
-            if (existing.Add(file))
+            if (existing.TryGetValue(file, out var row))
             {
-                Files.Add(new FileRowViewModel(file, source));
-                added++;
+                // Montajdan gelmiş bir dosya şimdi klasörden/aramadan da istendi: kullanıcı
+                // artık dosyanın TÜM konfigürasyonlarını istiyor demektir.
+                row.Scope = null;
+                continue;
             }
+
+            var newRow = new FileRowViewModel(file, source);
+            existing[file] = newRow;
+            Files.Add(newRow);
+            added++;
+        }
+
+        RaiseFileSummary();
+        return added;
+    }
+
+    /// <summary>
+    /// Montaj açılımındaki dosyaları kapsamlarıyla listeye ekler.
+    /// </summary>
+    /// <remarks>
+    /// Listede zaten olan bir dosyada: kapsamı yoksa (klasörden gelmiş, tüm konfigürasyonlar)
+    /// dokunulmaz; kapsamı varsa (başka bir montajdan gelmiş) kapsamlar birleşir.
+    /// </remarks>
+    private int AddAssemblyFiles(IReadOnlyList<ExpandedFile> files, string sourceDetail)
+    {
+        var existing = new Dictionary<PdmFileIdentity, FileRowViewModel>();
+        foreach (var row in Files)
+        {
+            existing[row.File] = row;
+        }
+
+        var added = 0;
+        foreach (var file in files)
+        {
+            if (existing.TryGetValue(file.File, out var row))
+            {
+                if (row.Scope is not null)
+                {
+                    row.Scope = row.Scope.Merge(file.Scope);
+                }
+
+                continue;
+            }
+
+            var newRow = new FileRowViewModel(file.File, FileSourceKind.Assembly, file.Scope, sourceDetail);
+            existing[file.File] = newRow;
+            Files.Add(newRow);
+            added++;
         }
 
         RaiseFileSummary();
@@ -839,6 +891,135 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         {
             IsBusy = false;
             BusyMessage = string.Empty;
+        }
+    }
+
+    /// <summary>
+    /// Montaj seçtirir, konfigürasyonunu sorar ve bileşenlerini listeye ekler.
+    /// </summary>
+    /// <remarks>
+    /// Seçim PDM'in kendi dosya seçme penceresiyle yapılır (birden fazla montaj seçilebilir);
+    /// montaj olmayan seçimler atlanır ve söylenir. Her montaj için ayrı ayrı konfigürasyon
+    /// sorulur, çünkü iki montajın konfigürasyonları birbirinden bağımsız.
+    /// </remarks>
+    private async Task AddFromAssemblyAsync()
+    {
+        if (_browser is null || _assemblyReader is null)
+        {
+            return;
+        }
+
+        _cancellation = new CancellationTokenSource();
+        IsBusy = true;
+
+        try
+        {
+            var token = _cancellation.Token;
+            var handle = _windowHandle;
+            var picked = await _queue.RunAsync(_ => _browser.BrowseForFiles(handle), token);
+
+            if (picked.IsFailure)
+            {
+                StatusMessage = picked.Summary + " " + picked.Detail;
+                return;
+            }
+
+            var assemblies = picked.Value
+                .Where(f => f.FileName.EndsWith(".sldasm", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            if (assemblies.Count == 0)
+            {
+                if (picked.Value.Count > 0)
+                {
+                    StatusMessage = "Seçilen dosyalar arasında montaj (.sldasm) yok. " +
+                                    "Parça ya da belge eklemek için Dosya Ekle'yi kullanın.";
+                }
+
+                return;
+            }
+
+            var totalAdded = 0;
+            var summaries = new List<string>();
+
+            foreach (var assembly in assemblies)
+            {
+                token.ThrowIfCancellationRequested();
+
+                var configurations = await _queue.RunAsync(_ => _assemblyReader.GetConfigurations(assembly), token);
+                if (configurations.IsFailure)
+                {
+                    StatusMessage = $"{assembly.FileName}: {configurations.Summary} {configurations.Detail}";
+                    continue;
+                }
+
+                if (configurations.Value.Count == 0)
+                {
+                    StatusMessage = $"{assembly.FileName}: konfigürasyon okunamadı; montaj atlandı.";
+                    continue;
+                }
+
+                // İletişim kutusu arayüz thread'inde; meşgul göstergesi kapalıyken gösterilir.
+                IsBusy = false;
+                var choice = AssemblyDialog.Show(_windowHandle, assembly.FileName, configurations.Value);
+                IsBusy = true;
+
+                if (choice is null)
+                {
+                    continue;
+                }
+
+                BusyMessage = $"Montaj okunuyor: {assembly.FileName}";
+
+                var structure = await _queue.RunAsync(
+                    t => _assemblyReader.ReadStructure(
+                        assembly, choice.Configuration, choice.IncludeSubassemblyContents, t),
+                    token);
+
+                if (structure.IsFailure)
+                {
+                    StatusMessage = $"{assembly.FileName}: {structure.Summary} {structure.Detail}";
+                    continue;
+                }
+
+                var expanded = AssemblyExpansion.Expand(
+                    assembly, choice.Configuration, structure.Value, choice.IncludeRoot);
+
+                var detail = $"{assembly.FileName} [{choice.Configuration}]";
+                var added = AddAssemblyFiles(expanded, detail);
+                totalAdded += added;
+
+                RememberFolderScope(assembly.FolderId, "Montaj: " + detail, includeSubfolders: false);
+
+                _log.Info($"Montajdan eklendi: {detail}, {expanded.Count} dosya, {added} yeni, " +
+                          $"alt montaj içerikleri {(choice.IncludeSubassemblyContents ? "dahil" : "hariç")}, " +
+                          $"kök montaj {(choice.IncludeRoot ? "dahil" : "hariç")}.");
+
+                summaries.Add(added == expanded.Count
+                    ? $"{assembly.FileName}: {added} dosya"
+                    : $"{assembly.FileName}: {added} dosya ({expanded.Count - added} zaten listedeydi)");
+            }
+
+            if (summaries.Count > 0)
+            {
+                StatusMessage = "Montajdan eklendi — " + string.Join("; ", summaries) + ".";
+            }
+        }
+        catch (OperationCanceledException)
+        {
+            StatusMessage = "Montaj okuma durduruldu.";
+        }
+        catch (Exception exception)
+        {
+            _log.Error("Montajdan eklenemedi.", exception);
+            StatusMessage = "Montajdan eklenemedi. Ayrıntı: " + _log.FilePath;
+        }
+        finally
+        {
+            IsBusy = false;
+            BusyMessage = string.Empty;
+            _cancellation?.Dispose();
+            _cancellation = null;
         }
     }
 
@@ -1065,12 +1246,21 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         try
         {
             var files = Files.Select(f => f.File).ToList();
+            var scopes = new Dictionary<PdmFileIdentity, FileExportScope>();
+            foreach (var row in Files)
+            {
+                if (row.Scope is not null)
+                {
+                    scopes[row.File] = row.Scope;
+                }
+            }
 
             var request = new ExportRequest(files, selected)
             {
                 ScopeDescription = _scopeDescription.Length > 0 ? _scopeDescription : "(seçili dosyalar)",
                 PrimaryFolderId = _scopeFolderId,
                 IncludeSubfolders = _scopeIncludeSubfolders,
+                Scopes = scopes,
             };
 
             var progress = new Progress<ExportProgress>(p => BusyMessage = p.Describe());
@@ -1537,6 +1727,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         AddFolderCommand.RaiseCanExecuteChanged();
         AddFilesCommand.RaiseCanExecuteChanged();
         SearchAndAddCommand.RaiseCanExecuteChanged();
+        AddFromAssemblyCommand.RaiseCanExecuteChanged();
         RemoveSelectedFilesCommand.RaiseCanExecuteChanged();
         ClearFilesCommand.RaiseCanExecuteChanged();
         ExportCommand.RaiseCanExecuteChanged();
@@ -1567,6 +1758,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             ExportService export,
             IPdmFolderScanner scanner,
             IPdmFileBrowser browser,
+            IPdmAssemblyReader assemblyReader,
             ImportService import,
             ApplyService apply,
             UndoService undo,
@@ -1578,6 +1770,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             Export = export;
             Scanner = scanner;
             Browser = browser;
+            AssemblyReader = assemblyReader;
             Import = import;
             Apply = apply;
             Undo = undo;
@@ -1593,6 +1786,8 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         public IPdmFolderScanner Scanner { get; }
 
         public IPdmFileBrowser Browser { get; }
+
+        public IPdmAssemblyReader AssemblyReader { get; }
 
         public ImportService Import { get; }
 
