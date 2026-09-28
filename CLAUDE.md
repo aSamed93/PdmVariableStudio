@@ -355,10 +355,13 @@ istemcide Explorer kapatılması demek. Yeni kod `App` projesine aittir.
 
 `docs/verify-package.ps1` iki listeyi de denetler; `docs/install-app.ps1` uygulamayı kurup
 kayıt defteri değerini yazar. `docs/package-release.ps1` GitHub Releases için zip + SHA-256
-üretir (`artifacts/`).
+üretir (`artifacts/`). `docs/build-installer.ps1` aynı dosyalardan Inno Setup kurulumu üretir
+(`installer/PdmVariableStudio.iss` → `artifacts/PdmVariableStudio-Setup-<sürüm>.exe`); PDM
+istemcisini denetler, .NET 4.8.1 eksikse kurar, eklentinin iki dosyasını `{app}\AddIn\`
+altına hazırlar.
 
-**Yayım paketine `EPDM.Interop.epdm.dll` KONMAZ.** Dassault Systèmes'in dosyası; yeniden
-dağıtım hakkımız yok ve her PDM istemcisinde zaten var. `install-app.ps1` onu
+**Yayım paketine ve kuruluma `EPDM.Interop.epdm.dll` KONMAZ.** Dassault Systèmes'in dosyası; yeniden
+dağıtım hakkımız yok ve her PDM istemcisinde zaten var. `install-app.ps1` ve kurulum (`.iss`'teki `external` bayrağı) onu
 `C:\Program Files\SOLIDWORKS PDM\` altından kopyalar; eklenti için kullanıcı aynı yerden
 alıp vault'a yükler (`docs/KULLANIM.md`). Yerel derleme çıktısında (`bin/`) bulunması
 normaldir — `Private=true` gerekçesi aşağıda — ama pakete girmez.
@@ -381,7 +384,7 @@ Dördü **ayrıdır**, birbirine bağlanmaz:
 
 | Sürüm | Yer | Ne zaman artar |
 |---|---|---|
-| `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version`; `Core`/`App` csproj `Version`; `app.manifest` `assemblyIdentity` | ürün sürümü (SemVer); `package-release.ps1` zip adını ve kılavuz PDF'i sürüm numarasını buradan alır (PDF yeniden üretilir), `CHANGELOG.md`'ye bölüm eklenir |
+| `ProductVersion` | `Core/Workbook/WorkbookWriter.cs` → `ProductInfo.Version`; `Core`/`App` csproj `Version`; `app.manifest` `assemblyIdentity` | ürün sürümü (SemVer); `package-release.ps1` zip adını, `build-installer.ps1` kurulum adını ve kılavuz PDF'i sürüm numarasını buradan alır (PDF yeniden üretilir), `CHANGELOG.md`'ye bölüm eklenir |
 | `AddInVersion` | `AddIn/VariableStudioAddIn.GetAddInInfo` (`mlAddInVersion`) **ve** `AddIn/AssemblyInfo.cs` | **her vault yüklemesinde**, ikisi birlikte — eklenti nadiren değişir, bu yüzden nadiren artar. `CHANGELOG.md`'de o sürüm **(eklenti güncellendi)** ile işaretlenir |
 | `WorkbookSchemaVersion` | `Core/Workbook/WorkbookSchema.cs` | `.xlsx` düzeni değiştiğinde |
 | `JournalSchemaVersion` | `Core/Journal/JsonlOperationJournal.cs` | günlük satır düzeni değiştiğinde |

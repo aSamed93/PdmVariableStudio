@@ -27,7 +27,14 @@ değildir.
 
 ### 1. Uygulama — her bilgisayara
 
-Yayım paketini (`PdmVariableStudio-x.y.z.zip`) açın. Yönetici olarak açılmış bir
+**En kolayı: kurulum dosyası.** `PdmVariableStudio-Setup-x.y.z.exe`'yi çalıştırın ve sihirbazı
+izleyin. Kurulum PDM istemcisinin kurulu olduğunu denetler, .NET Framework 4.8.1 eksikse
+indirip kurar, uygulamayı `C:\Program Files\PDM Variable Studio\` altına kurar ve eklentinin
+iki dosyasını `C:\Program Files\PDM Variable Studio\AddIn\` klasörüne hazırlar (bitişte o
+klasör açılır). Uygulama imzasız olduğu için SmartScreen *Daha fazla bilgi → Yine de çalıştır*
+isteyebilir.
+
+**Zip paketiyle:** yayım paketini (`PdmVariableStudio-x.y.z.zip`) açın. Yönetici olarak açılmış bir
 PowerShell'de, açtığınız klasöre gidip:
 
 ```powershell
@@ -59,8 +66,8 @@ PDM Administration → vault → **Add-ins** → sağ tık → **New Add-in…**
 
 | Dosya | Nerede |
 |---|---|
-| `PdmVariableStudio.AddIn.dll` | paketteki `AddIn\` klasörü |
-| `EPDM.Interop.epdm.dll` | `C:\Program Files\SOLIDWORKS PDM\` — **pakette yoktur**, PDM istemcinizden alın |
+| `PdmVariableStudio.AddIn.dll` | kurulum dosyasıyla kurduysanız `C:\Program Files\PDM Variable Studio\AddIn\`; zip'le kurduysanız paketteki `AddIn\` klasörü |
+| `EPDM.Interop.epdm.dll` | kurulum dosyasıyla kurduysanız aynı `AddIn\` klasöründe hazır; zip'le kurduysanız `C:\Program Files\SOLIDWORKS PDM\` — **pakette yoktur**, PDM istemcinizden alın |
 
 > **İkinci dosyayı atlamayın.** Eksik olduğunda PDM, eklentiyi yüklerken
 > *"…is not a multi-threaded COM-server"* gibi yanıltıcı bir hata verir; hata mesajı
@@ -215,7 +222,8 @@ Dosya SOLIDWORKS'te açık. Kapatıp o dosya için tekrar uygulayın; diğer dos
 
 ## Sürüm yükseltme
 
-- **Uygulama:** yeni paketteki `install-app.ps1`'i çalıştırın. Explorer kapatmak gerekmez.
+- **Uygulama:** yeni kurulum dosyasını çalıştırın (ya da yeni zip'teki `install-app.ps1`'i).
+  Explorer kapatmak gerekmez; işlem geçmişi ve ayarlar korunur.
 - **Eklenti:** yalnızca sürüm notlarında "eklenti güncellendi" yazıyorsa. Administration'da
   eklentiyi güncelleyin (iki dosya), tüm Explorer'ları kapatıp açın.
 

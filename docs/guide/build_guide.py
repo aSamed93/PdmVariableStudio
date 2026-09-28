@@ -563,7 +563,20 @@ story.append(callout("note", "EPDM.Interop.epdm.dll neden pakette yok?", [
     "kopyalar; eklenti için de aynı yerden seçeceksiniz."]))
 
 story.append(H2("3.2 Uygulamayı kurma (her bilgisayara)", "s3-2"))
-story.append(H3("Standart kurulum (önerilen)", "s3-2a"))
+story.append(H3("Kurulum dosyasıyla (en kolay)", "s3-2s"))
+story += steps([
+    f"{link(RELEASES, 'GitHub Releases')} sayfasından "
+    + c(f"PdmVariableStudio-Setup-{VERSION}.exe") + " dosyasını indirip çalıştırın. "
+    "Uygulama imzasız olduğu için Windows SmartScreen uyarı verebilir: <b>Daha fazla bilgi → "
+    "Yine de çalıştır</b>.",
+    "Sihirbazı izleyin. Kurulum önce PDM istemcisinin kurulu olduğunu denetler; "
+    ".NET Framework 4.8.1 eksikse indirip kurar.",
+    "Bitişte eklentinin iki dosyasının hazırlandığı " + c("C:\\Program Files\\PDM Variable Studio\\AddIn\\")
+    + " klasörü açılır. Bu iki dosyayı " + ref("s3-3", "3.3") + "'teki gibi vault'a yükleyin.",
+])
+story.append(P("Kaldırmak için <b>Ayarlar → Uygulamalar</b>. Kaldırma, işlem geçmişinize ve "
+               "ayarlarınıza dokunmaz."))
+story.append(H3("Zip paketiyle kurulum", "s3-2a"))
 story += steps([
     "Başlat menüsünde <b>PowerShell</b> yazın, sağ tıklayın → <b>Yönetici olarak çalıştır</b>.",
     "Zip'i çıkardığınız klasöre gidin (yolu kendinize göre düzeltin):",
@@ -612,9 +625,11 @@ story += steps([
 ])
 story.append(table([
     ["Dosya", "Nerede"],
-    [c("PdmVariableStudio.AddIn.dll"), "Zip'ten çıkardığınız klasördeki " + c("AddIn\\")
-     + " klasöründe"],
-    [c("EPDM.Interop.epdm.dll"), c("C:\\Program Files\\SOLIDWORKS PDM\\")
+    [c("PdmVariableStudio.AddIn.dll"), "Kurulum dosyasıyla kurduysanız "
+     + c("C:\\Program Files\\PDM Variable Studio\\AddIn\\") + "; zip'le kurduysanız "
+     "çıkardığınız klasördeki " + c("AddIn\\") + " klasöründe"],
+    [c("EPDM.Interop.epdm.dll"), "Kurulum dosyasıyla kurduysanız aynı " + c("AddIn\\")
+     + " klasöründe hazır; zip'le kurduysanız " + c("C:\\Program Files\\SOLIDWORKS PDM\\")
      + " — pakette yoktur, PDM istemcinizden alın"],
 ], [0.38, 0.62]))
 for n, t in [(4, "<b>Aç</b>'a tıklayın, eklenti bilgilerini gösteren pencerede <b>Tamam</b> "
@@ -942,8 +957,8 @@ story.append(H1("7. Güncelleme ve kaldırma", "s7"))
 story.append(H2("7.1 Yeni sürüme geçme", "s7-1"))
 story.append(table([
     ["Parça", "Ne zaman", "Nasıl"],
-    ["<b>Uygulama</b>", "Her yeni sürümde", "Yeni zip'i indirip " + c("install-app.ps1")
-     + "'i yeniden çalıştırın. Önce uygulama penceresini kapatın. PDM Explorer'ı kapatmak "
+    ["<b>Uygulama</b>", "Her yeni sürümde", "Yeni kurulum dosyasını çalıştırın (ya da yeni "
+     "zip'i indirip " + c("install-app.ps1") + "'i yeniden çalıştırın). Önce uygulama penceresini kapatın. PDM Explorer'ı kapatmak "
      "<b>gerekmez</b>. İşlem geçmişiniz ve ayarlarınız korunur."],
     ["<b>Eklenti</b>", "Yalnızca sürüm notlarında <b>“eklenti güncellendi”</b> yazıyorsa",
      "Administration → Add-ins → mevcut eklentiyi yeni " + c("PdmVariableStudio.AddIn.dll")
