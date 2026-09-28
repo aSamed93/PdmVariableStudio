@@ -135,11 +135,11 @@ internal sealed class PdmVariableWriter : IPdmVariableWriter
             var value = write.Value.ToPdmObject();
             var configuration = write.Configuration.ToPdmString(file.IsSolidWorksFile);
 
-            // Son parametre "tüm konfigürasyonlara uygula" anlamına geliyor ve HER ZAMAN
-            // false gönderiliyor: her konfigürasyon ayrı bir hücre olarak yönetiliyor ve
-            // kullanıcı açıkça istemeden birden fazla konfigürasyona yazmıyoruz.
-            // PHASE 0'DA DOĞRULANACAK: bu parametrenin tam anlamı dokümantasyondan teyit
-            // edilemedi; false göndermek gözlemlenen davranışa uygun ve güvenli taraf.
+            // Son parametre HER ZAMAN false: her konfigürasyon ayrı bir hücre olarak
+            // yönetiliyor ve kullanıcı açıkça istemeden birden fazla konfigürasyona yazılmıyor.
+            // Gerçek vault'ta doğrulandı (docs/SPIKE-PHASE0.md madde 5): false ile
+            // konfigürasyonlar birbirini etkilemiyor. true'nun tam davranışı bilinmiyor ve
+            // gerekmiyor — true YAPMAYIN, dokunulmayan konfigürasyonları ezebilir.
             ((IEdmEnumeratorVariable5)enumerator).SetVar(write.Variable.Name, configuration, ref value, false);
 
             return new VariableWriteResult(write.Configuration, write.Variable.VariableId, succeeded: true);

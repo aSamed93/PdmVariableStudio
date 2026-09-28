@@ -24,10 +24,10 @@ namespace PdmVariableStudio.App.Threading;
 /// sınıfı sorunların tamamı ortadan kalkıyor.
 /// </para>
 /// <para>
-/// <b>PHASE 0'DA DOĞRULANACAK:</b> Explorer sürecinin içindeki bir arka plan STA thread'inde
-/// <c>LoginAuto</c>'nun çalıştığı gerçek vault'ta teyit edilmeli. Çalışmazsa alternatif, tüm
-/// PDM işini Explorer STA'sında <c>Dispatcher</c> ile parçalayarak yapmaktır (daha kötü
-/// deneyim, ama güvenli). Bu sınıf değişimi tek noktada tutuyor.
+/// <b>Doğrulandı (2026-08-25, docs/SPIKE-PHASE0.md madde 1):</b> adanmış bir arka plan STA
+/// thread'inde <c>new EdmVault5Class()</c> + <c>LoginAuto</c> çalışıyor ve değişkenler bu
+/// thread üzerinden okunabiliyor. Uygulama artık ayrı süreçte olduğu için Explorer'ın
+/// apartment'ı hiç devrede değil; bu sınıf yine de tüm PDM erişimini tek thread'de tutuyor.
 /// </para>
 /// <para>
 /// İşler SIRAYLA çalışır. Eşzamanlı PDM erişimi bilinçli olarak yok: PDM API'si iş parçacığı
