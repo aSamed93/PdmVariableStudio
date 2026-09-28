@@ -4,6 +4,16 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/), sürümleme
 [SemVer](https://semver.org/lang/tr/). Uygulama sürümü ile eklenti sürümü ayrıdır; eklentiyi
 yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir.
 
+## [Yayımlanmadı]
+
+### Eklendi
+- **Montajdan Ekle:** bir montaj seçilir, konfigürasyonu sorulur; montajın bütün bileşenleri
+  (istenirse alt montajların içindekiler de) farklı klasörlerde olsalar bile listeye eklenir.
+  Her parça için yalnızca **montajın kullandığı konfigürasyon** ve dosya düzeyi (`@`) satır
+  olur. Çalışma kitabına *Üst montaj*, *Seviye* ve *Adet* bilgi sütunları eklenir (adetler
+  alt montajlar boyunca çarpılır, aynı parça birden fazla yerde geçse de tek satırdır).
+  Şema sürümü değişmedi; eklenti değişmedi.
+
 ## [1.1.1] — 2026-09-27
 
 ### Düzeltildi

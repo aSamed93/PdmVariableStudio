@@ -126,7 +126,7 @@ public sealed class WorkbookWriter
             rowIndex++;
         }
 
-        var lastColumn = WorkbookSchema.FirstVariableColumn + session.Variables.Count - 1;
+        var lastColumn = session.FirstVariableColumn + session.Variables.Count - 1;
         var lastRow = Math.Max(1, session.Rows.Count + 1);
 
         var worksheet = new Worksheet();
@@ -188,12 +188,19 @@ public sealed class WorkbookWriter
         columns.AppendChild(new Column { Min = 3, Max = 3, Width = 28D, CustomWidth = true });
         columns.AppendChild(new Column { Min = 4, Max = 4, Width = 18D, CustomWidth = true });
 
+        if (session.HasAssemblyInfo)
+        {
+            var first = (uint)WorkbookSchema.FirstVariableColumn;
+            columns.AppendChild(new Column { Min = first, Max = first, Width = 30D, CustomWidth = true });
+            columns.AppendChild(new Column { Min = first + 1, Max = first + 2, Width = 10D, CustomWidth = true });
+        }
+
         if (session.Variables.Count > 0)
         {
             columns.AppendChild(new Column
             {
-                Min = (uint)WorkbookSchema.FirstVariableColumn,
-                Max = (uint)(WorkbookSchema.FirstVariableColumn + session.Variables.Count - 1),
+                Min = (uint)session.FirstVariableColumn,
+                Max = (uint)(session.FirstVariableColumn + session.Variables.Count - 1),
                 Width = 20D,
                 CustomWidth = true,
             });
@@ -211,6 +218,15 @@ public sealed class WorkbookWriter
         row.AppendChild(TextCell(3, 1, WorkbookSchema.HeaderRelativePath, WorkbookStyles.Header));
         row.AppendChild(TextCell(4, 1, WorkbookSchema.HeaderConfiguration, WorkbookStyles.Header));
 
+        if (session.HasAssemblyInfo)
+        {
+            for (var i = 0; i < WorkbookSchema.AssemblyInfoHeaders.Count; i++)
+            {
+                row.AppendChild(TextCell(
+                    WorkbookSchema.FirstVariableColumn + i, 1, WorkbookSchema.AssemblyInfoHeaders[i], WorkbookStyles.Header));
+            }
+        }
+
         for (var i = 0; i < session.Variables.Count; i++)
         {
             var variable = session.Variables[i];
@@ -218,7 +234,7 @@ public sealed class WorkbookWriter
                 ? variable.DisplayName + " (salt okunur)"
                 : variable.DisplayName;
 
-            row.AppendChild(TextCell(WorkbookSchema.FirstVariableColumn + i, 1, caption, WorkbookStyles.Header));
+            row.AppendChild(TextCell(session.FirstVariableColumn + i, 1, caption, WorkbookStyles.Header));
         }
 
         return row;
@@ -241,16 +257,46 @@ public sealed class WorkbookWriter
             exportRow.Configuration.ToDisplayString(),
             WorkbookStyles.Identity));
 
+        if (session.HasAssemblyInfo)
+        {
+            AppendAssemblyInfo(row, exportRow.Placement, rowIndex);
+        }
+
         for (var i = 0; i < session.Variables.Count; i++)
         {
             var variable = session.Variables[i];
             var value = i < exportRow.Values.Count ? exportRow.Values[i] : VariableValue.Empty;
             var style = WorkbookStyles.ForVariable(variable.DataType, variable.IsReadOnly);
 
-            row.AppendChild(ValueCell(WorkbookSchema.FirstVariableColumn + i, rowIndex, value, style));
+            row.AppendChild(ValueCell(session.FirstVariableColumn + i, rowIndex, value, style));
         }
 
         return row;
+    }
+
+    /// <summary>
+    /// Montaj bilgi sütunları. Montajdan gelmeyen satırda (karışık kaynaklı liste) boş kalır.
+    /// </summary>
+    /// <remarks>
+    /// Kök montajın kendi satırında üst montaj boştur ve seviye 0'dır. Hücreler kimlik
+    /// sütunları gibi kilitli (<see cref="WorkbookStyles.Identity"/>): bunlar PDM'e
+    /// yazılmaz, düzenlenebilir görünmeleri yanıltıcı olurdu.
+    /// </remarks>
+    private static void AppendAssemblyInfo(Row row, AssemblyPlacement? placement, uint rowIndex)
+    {
+        var first = WorkbookSchema.FirstVariableColumn;
+
+        if (placement is null)
+        {
+            row.AppendChild(TextCell(first, rowIndex, string.Empty, WorkbookStyles.Identity));
+            row.AppendChild(TextCell(first + 1, rowIndex, string.Empty, WorkbookStyles.Identity));
+            row.AppendChild(TextCell(first + 2, rowIndex, string.Empty, WorkbookStyles.Identity));
+            return;
+        }
+
+        row.AppendChild(TextCell(first, rowIndex, placement.ParentName, WorkbookStyles.Identity));
+        row.AppendChild(NumberCell(first + 1, rowIndex, placement.Level, WorkbookStyles.Identity));
+        row.AppendChild(NumberCell(first + 2, rowIndex, placement.TotalQuantity, WorkbookStyles.Identity));
     }
 
     // ----------------------------------------------------------------- _Metadata
@@ -261,7 +307,7 @@ public sealed class WorkbookWriter
         var columnIndexes = new List<int>(session.Variables.Count);
         for (var i = 0; i < session.Variables.Count; i++)
         {
-            columnIndexes.Add(WorkbookSchema.FirstVariableColumn + i);
+            columnIndexes.Add(session.FirstVariableColumn + i);
         }
 
         var checksum = WorkbookSchema.ComputeMetadataChecksum(metadata, session.Variables, columnIndexes);

@@ -134,7 +134,11 @@ Komut görünmüyorsa günlüğe bakın — `[eklenti]` etiketli satırlar akı�
 - [ ] `Ara ve Ekle` — değişken adı + değeriyle süzüyor
 - [ ] Boş ölçütle arama uyarı veriyor, vault'un tamamını çekmiyor
 - [ ] Aynı dosya iki kaynaktan eklendiğinde **bir kez** listede
-- [ ] `Kaynak` sütunu doğru (Klasör / Dosya seçimi / Arama)
+- [ ] `Kaynak` sütunu doğru (Klasör / Dosya seçimi / Arama / Montaj)
+- [ ] `Montajdan Ekle` — montaj seçimi ve konfigürasyon penceresi açılıyor; montaj olmayan seçim uyarı veriyor
+- [ ] `Montajdan Ekle` — bileşenler PDM'in *Contains* sekmesiyle aynı; alt montaj içerikleri kutusu kapalıyken yalnızca 1. seviye
+- [ ] `Montajdan Ekle` — parçaların yalnızca montajın kullandığı konfigürasyonu ve `@` satırı Excel'de; *Üst montaj / Seviye / Adet* doğru
+- [ ] `Montajdan Ekle` ile gelen bir dosya sonra `Klasör Ekle` ile de eklenirse tüm konfigürasyonları gelir
 - [ ] `Seçilenleri Sil` yalnızca işaretlileri çıkarıyor
 - [ ] `Listeyi Temizle` listeyi boşaltıyor
 - [ ] Eklentiden klasöre sağ tıklayarak gelince o klasörün dosyaları hazır geliyor

@@ -96,6 +96,9 @@
                                 <Button Content="Ara ve Ekle…"
                                         Command="{Binding SearchAndAddCommand}"
                                         ToolTip="Dosya adı ya da kart değerine göre arayıp sonuçları ekler" />
+                                <Button Content="Montajdan Ekle…"
+                                        Command="{Binding AddFromAssemblyCommand}"
+                                        ToolTip="Bir montajın tüm bileşenlerini, montajın kullandığı konfigürasyonlarla ekler" />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -126,7 +129,13 @@
                             <DataGridTextColumn Header="Dosya" Binding="{Binding FileName}" Width="260" IsReadOnly="True" />
                             <DataGridTextColumn Header="Klasör" Binding="{Binding RelativePath}" Width="*" IsReadOnly="True" />
                             <DataGridTextColumn Header="Tür" Binding="{Binding TypeText}" Width="110" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Kaynak" Binding="{Binding SourceText}" Width="110" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Kaynak" Binding="{Binding SourceText}" Width="110" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock" BasedOn="{x:Static DataGridTextColumn.DefaultElementStyle}">
+                                        <Setter Property="ToolTip" Value="{Binding SourceToolTip}" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
 

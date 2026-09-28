@@ -31,6 +31,7 @@ Sonuçları bu belgeye yazın. Bir madde `❌` çıkarsa, ilgili kod yorumundaki
 | 7 | `Flush()` sonrası Explorer kart tazeleme | — | 🟡 check-in ile doğrulandı; check-in kapalıyken denenmedi |
 | 8 | Komutun menülerde görünmesi | `AddIn/VariableStudioAddIn.cs` | ✅ **doğrulandı** |
 | 9 | Ölçüm: 10 / 100 / 1.000 dosya süresi | — | 🟡 14 dosya ölçüldü; 100+ bekliyor |
+| 10 | Montaj yapısı: referans ağacı | `App/Pdm/PdmAssemblyReader.cs` | ✅ **doğrulandı** |
 
 ---
 
@@ -310,8 +311,7 @@ Günlükte her adım görünür (`[eklenti]` etiketiyle):
 
 ## 9. Ölçüm
 
-Aşağıdaki tabloyu gerçek vault'ta doldurun. Tasarım 1.000 dosya için makul süre hedefliyor;
-aşılırsa Phase 9'daki `IEdmBatchListing4` hızlı okuma yolu değerlendirilir.
+Aşağıdaki tabloyu gerçek vault'ta doldurun. Tasarım 1.000 dosya için makul süre hedefliyor.
 
 | Dosya sayısı | Değişken sayısı | Tarama | Değer okuma | Excel yazma | Toplam |
 |---|---|---|---|---|---|
@@ -333,3 +333,38 @@ Süreyi hücre sayısı değil **dosya sayısı** belirliyor: her dosya için ch
 check-in birer PDM turu. Bu hızla 1.000 dosya yaklaşık **27 dakika** sürer; darboğaz okuma
 değil yazma. Yazma stratejisi bilinçli seçildi (bkz. `CLAUDE.md` → "Yazma stratejisi");
 hızlandırma ancak toplu check-out/check-in ile mümkün ve önce ölçülmeli.
+
+---
+
+## 10. Montaj yapısı: referans ağacı — ✅ DOĞRULANDI (2026-09-28)
+
+**Neden önemli:** "Montajdan Ekle" bir montajın bileşenlerini, montajın kullandığı
+konfigürasyonlarla ve adetleriyle listeler. Yanlış konfigürasyon, kullanıcıyı montajda hiç
+kullanılmayan bir konfigürasyonun satırını düzenlemeye iter.
+
+**İki yol denendi**, `TEKYAZ\Nemo\UBW-21161-44621.SLDASM` (Default) üzerinde, salt okunur:
+
+| Yol | Sonuç |
+|---|---|
+| `IEdmFile5.GetReferenceTree` + `IEdmReference10.GetFirstChildPosition3` | Bileşen başına `FileID`, `FolderID`, `RefConfiguration`, `RefCount`. Alt montaj (44627) altındaki üç parça seviye 2'de geldi |
+| `IEdmFile7.GetComputedBOM` (şablon "BOM") | Aynı bileşenler, aynı konfigürasyonlar, aynı adetler; ama satır başına yalnızca dosya **yolu** — kimlik için ek çözümleme gerekir, ve bir şablona bağlı |
+
+**Seçilen:** referans ağacı — şablondan bağımsız, kimliği doğrudan veriyor.
+
+**Tuzaklar:**
+
+- `GetFirstChildPosition3`'e konfigürasyon **boş** verilirse her bileşen `"@"` ile döner;
+  montajın gerçekte kullandığı konfigürasyon kaybolur. Kök montajın adlandırılmış bir
+  konfigürasyonu verilmeli ve her alt montaja, üstünün onda kullandığı konfigürasyonla
+  (`RefConfiguration`) inilmeli. `PdmAssemblyReader` dosya düzeyi konfigürasyonla çağrıyı
+  reddeder.
+- `RefCount` montajdaki **gerçek** adettir. PDM BOM görünümündeki "Qty" sütunu ise kartta
+  doldurulmuş bir `BOM Quantity` değişkenini dikkate alabilir — `44633`'ün kartında
+  `BOM Quantity = 4` iken (2026-09-27 kaydı) BOM görünümü 4 gösterdi; montajdaki gerçek adet
+  1. Bilinçli: araç yapıyı gösteriyor.
+- PowerShell'in COM köprüsü `IEdmPos5` konumunu ilerletmiyor (`GetNextChild` sonsuz
+  döngüye giriyor). Denemeler C# ile yapılmalı.
+
+**Tekrar doğrulamak için:** Dışa Aktar → **Montajdan Ekle…** → montaj ve konfigürasyon seçin.
+`studio.log`'da `Montaj okundu: … N bulunuş` satırı çıkar; listedeki dosyalar PDM'in
+*Contains* sekmesiyle, Excel'deki adetler montajla karşılaştırılır.

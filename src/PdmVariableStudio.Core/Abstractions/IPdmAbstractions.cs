@@ -63,6 +63,7 @@ public enum FileSourceKind
     Folder = 0,
     File = 1,
     Search = 2,
+    Assembly = 3,
 }
 
 /// <summary>Arama ölçütleri.</summary>
@@ -114,6 +115,33 @@ public interface IPdmFileBrowser
     OperationOutcome<IReadOnlyList<PdmFileIdentity>> Search(
         FileSearchCriteria criteria,
         IProgress<int>? progress = null,
+        CancellationToken cancellationToken = default);
+}
+
+/// <summary>Bir montajın yapısını okur.</summary>
+/// <remarks>
+/// PDM'in BOM şablonları yerine <b>referans ağacı</b> okunur: şablondan bağımsızdır ve her
+/// bileşen için dosya kimliğini, bulunduğu klasörü, montajın kullandığı konfigürasyonu ve
+/// adedi doğrudan verir. Gerçek vault'ta doğrulandı (docs/SPIKE-PHASE0.md, madde 10).
+/// </remarks>
+public interface IPdmAssemblyReader
+{
+    /// <summary>Montajın adlandırılmış konfigürasyonları (dosya düzeyi <c>@</c> hariç).</summary>
+    OperationOutcome<IReadOnlyList<ConfigurationKey>> GetConfigurations(PdmFileIdentity assembly);
+
+    /// <summary>
+    /// Montajın bileşenlerini DERİNLİK ÖNCELİKLİ sırayla döner (bir alt montajın çocukları,
+    /// alt montajın hemen ardından). Kök montajın kendisi listede yoktur.
+    /// </summary>
+    /// <param name="assembly">Kök montaj.</param>
+    /// <param name="configuration">Açılımı yapılacak konfigürasyon. Dosya düzeyi olamaz.</param>
+    /// <param name="includeSubassemblyContents">
+    /// <c>false</c> ise yalnızca doğrudan alt bileşenler (seviye 1) döner.
+    /// </param>
+    OperationOutcome<IReadOnlyList<AssemblyOccurrence>> ReadStructure(
+        PdmFileIdentity assembly,
+        ConfigurationKey configuration,
+        bool includeSubassemblyContents,
         CancellationToken cancellationToken = default);
 }
 

@@ -108,8 +108,7 @@ public sealed class UndoPreview
 /// <para>
 /// Undo, uygulamanın kendisiyle AYNI boru hattını kullanır: aynı check-out politikası, aynı
 /// yeniden doğrulama, aynı günlük. Undo işleminin kendisi de günlüğe yeni bir işlem olarak
-/// yazılır; dolayısıyla onun da geri alınması (yani Redo) mimari olarak mümkündür — MVP'de
-/// arayüzde açılmadı, o kadar.
+/// yazılır ve İşlem Geçmişi'nde diğer işlemler gibi görünür.
 /// </para>
 /// </remarks>
 public sealed class UndoService

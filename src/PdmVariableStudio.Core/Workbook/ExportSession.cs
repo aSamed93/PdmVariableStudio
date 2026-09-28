@@ -12,13 +12,15 @@ public sealed class ExportRow
         PdmFileIdentity file,
         ConfigurationKey configuration,
         int fileVersion,
-        IReadOnlyList<VariableValue> values)
+        IReadOnlyList<VariableValue> values,
+        AssemblyPlacement? placement = null)
     {
         ExportRowId = exportRowId;
         File = file;
         Configuration = configuration;
         FileVersion = fileVersion;
         Values = values;
+        Placement = placement;
     }
 
     /// <summary>
@@ -41,6 +43,12 @@ public sealed class ExportRow
 
     /// <summary>Değerler, <see cref="ExportSession.Variables"/> ile AYNI sırada.</summary>
     public IReadOnlyList<VariableValue> Values { get; }
+
+    /// <summary>
+    /// Satır montajdan geldiyse montajdaki yeri; değilse <c>null</c>. Yalnızca gösterim —
+    /// <c>_Rows</c>'a ve damgaya girmez, içe aktarımda okunmaz.
+    /// </summary>
+    public AssemblyPlacement? Placement { get; }
 }
 
 /// <summary>
@@ -97,4 +105,28 @@ public sealed class ExportSession
     public IReadOnlyList<PdmVariableDefinition> Variables { get; }
 
     public IReadOnlyList<ExportRow> Rows { get; }
+
+    /// <summary>
+    /// En az bir satır montajdan geldiyse <c>true</c>: çalışma kitabına montaj bilgi sütunları
+    /// eklenir (bkz. <see cref="WorkbookSchema.AssemblyInfoHeaders"/>).
+    /// </summary>
+    public bool HasAssemblyInfo
+    {
+        get
+        {
+            foreach (var row in Rows)
+            {
+                if (row.Placement is not null)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    /// <summary>İlk değişken sütunu: montaj bilgi sütunları varsa onların ardından.</summary>
+    public int FirstVariableColumn =>
+        WorkbookSchema.FirstVariableColumn + (HasAssemblyInfo ? WorkbookSchema.AssemblyInfoHeaders.Count : 0);
 }

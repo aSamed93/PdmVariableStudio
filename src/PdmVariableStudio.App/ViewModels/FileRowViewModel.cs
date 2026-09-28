@@ -15,16 +15,50 @@ namespace PdmVariableStudio.App.ViewModels;
 internal sealed class FileRowViewModel : ObservableObject
 {
     private bool _isSelected;
+    private FileExportScope? _scope;
+    private string _sourceDetail;
 
-    public FileRowViewModel(PdmFileIdentity file, FileSourceKind source)
+    public FileRowViewModel(PdmFileIdentity file, FileSourceKind source, FileExportScope? scope = null, string? sourceDetail = null)
     {
         File = file;
         Source = source;
+        _scope = scope;
+        _sourceDetail = sourceDetail ?? string.Empty;
     }
 
     public PdmFileIdentity File { get; }
 
     public FileSourceKind Source { get; }
+
+    /// <summary>
+    /// Dışa aktarım kapsamı. Montajdan gelen dosyada yalnızca montajın kullandığı
+    /// konfigürasyonlar; <c>null</c> ise tüm konfigürasyonlar.
+    /// </summary>
+    /// <remarks>
+    /// Aynı dosya sonradan klasörden ya da aramadan da eklenirse kapsam kaldırılır: kullanıcı
+    /// artık dosyanın tamamını istiyor demektir. İki montajdan eklenirse kapsamlar birleşir.
+    /// </remarks>
+    public FileExportScope? Scope
+    {
+        get => _scope;
+        set => Set(ref _scope, value);
+    }
+
+    /// <summary>Kaynak sütununun ipucu: dosyanın hangi montajdan geldiği.</summary>
+    public string SourceDetail
+    {
+        get => _sourceDetail;
+        set
+        {
+            if (Set(ref _sourceDetail, value ?? string.Empty))
+            {
+                Raise(nameof(SourceToolTip));
+            }
+        }
+    }
+
+    /// <summary>Boş ipucu WPF'te boş bir kutu gösteriyor; o yüzden null.</summary>
+    public string? SourceToolTip => _sourceDetail.Length > 0 ? _sourceDetail : null;
 
     /// <summary>Listede işaretli mi. "Seçilenleri sil" bunu kullanır.</summary>
     public bool IsSelected
@@ -69,6 +103,7 @@ internal sealed class FileRowViewModel : ObservableObject
     {
         FileSourceKind.Folder => "Klasör",
         FileSourceKind.File => "Dosya seçimi",
+        FileSourceKind.Assembly => "Montaj",
         _ => "Arama",
     };
 }
