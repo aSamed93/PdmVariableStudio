@@ -1,0 +1,4 @@
+# Her değişiklik için gözden geçirme isteği depo sahibine gider.
+# Dal koruma kuralında "Require review from Code Owners" açıkken bu dosya,
+# sahibin onayı olmadan main'e hiçbir PR'ın birleşmemesini sağlar.
+* @aSamed93

@@ -243,7 +243,7 @@ public class JournalTests : IDisposable
     }
 
     private static ApplyOperation NewOperation() =>
-        new(Guid.NewGuid(), OperationType.Apply, DateTime.UtcNow, Vault, "ATARLAK\\atarlak", "atarlak")
+        new(Guid.NewGuid(), OperationType.Apply, DateTime.UtcNow, Vault, "MAKINA\\ayse", "ayse")
         {
             SourceWorkbookPath = "C:\\test\\mil.xlsx",
             ExportSessionId = Guid.NewGuid(),

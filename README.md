@@ -21,10 +21,10 @@ PDM Explorer'da klasöre sağ tık
 |---|---|
 | **Hedef** | SOLIDWORKS PDM Professional 2022 (30.0) ve üstü; 2025 (33.5) üzerinde geliştirildi |
 | **Platform** | .NET Framework 4.8.1, WPF, AnyCPU |
-| **Ürün sürümü** | 1.1.0 — [değişiklikler](CHANGELOG.md) |
+| **Ürün sürümü** | 1.2.0 — [değişiklikler](CHANGELOG.md) |
 | **Lisans** | [MIT](LICENSE) — ücretsiz, lisans anahtarı yok |
 | **Gizlilik** | Hiçbir yere veri göndermez; günlük ve geçmiş yalnızca yerel diskte |
-| **Test** | 121 birim testi, PDM istemcisi olmadan koşar |
+| **Test** | 136 birim testi, PDM istemcisi olmadan koşar — [![CI](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml/badge.svg)](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml) |
 | **Durum** | Gerçek vault'ta uçtan uca doğrulandı (dışa aktar → düzenle → içe aktar → uygula → geri al) |
 
 > **Kurulum ve kullanım kılavuzu (PDF):**
@@ -205,7 +205,25 @@ dotnet test tests/PdmVariableStudio.Tests -c Debug
 | [docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf](docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf) | **Kurulum ve kullanım kılavuzu (PDF):** indirme, kurulum, eklenti, kullanım, sorun giderme, kaldırma |
 | [docs/KULLANIM.md](docs/KULLANIM.md) | Son kullanıcı kılavuzunun kısa hâli (yayım paketine de girer) |
 | [CHANGELOG.md](CHANGELOG.md) | Sürüm notları |
-| [CLAUDE.md](CLAUDE.md) | Mimari kararların gerekçeleri ve **dokunmadan önce bilinmesi gerekenler** |
+| [CLAUDE.md](CLAUDE.md) | Mimari kararların gerekçeleri ve **dokunmadan önce bilinmesi gerekenler** (adı yapay zekâ araçlarına hitap eder, içerik her katkıcı için) |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Katkı süreci, geliştirme ortamı, stil |
+| [SECURITY.md](SECURITY.md) | Güvenlik açığı bildirme |
 | [docs/WORKBOOK-CONTRACT.md](docs/WORKBOOK-CONTRACT.md) | `.xlsx` formatının tam tanımı ve "kullanıcı şunu yaparsa ne olur" tablosu |
 | [docs/LOCAL_TESTING.md](docs/LOCAL_TESTING.md) | Kurulum adımları ve kabul kontrol listeleri |
 | [docs/SPIKE-PHASE0.md](docs/SPIKE-PHASE0.md) | Gerçek vault'ta doğrulanan PDM API davranışları |
+
+## Katkı
+
+Hata bildirimi ve öneri için [Issues](https://github.com/aSamed93/PdmVariableStudio/issues);
+kod için fork → dal → PR. Süreç ve kurallar [CONTRIBUTING.md](CONTRIBUTING.md) içinde.
+`main` dalı korumalıdır: her PR CI'dan geçer ve depo sahibi tarafından gözden geçirilir.
+Güvenlik bulguları için [SECURITY.md](SECURITY.md).
+
+## Lisans ve yazar
+
+[MIT](LICENSE) — Abdussamed Tarlak ([@aSamed93](https://github.com/aSamed93)).
+
+SOLIDWORKS ve SOLIDWORKS PDM, Dassault Systèmes SolidWorks Corp. şirketinin tescilli
+markalarıdır. Bu proje bağımsızdır; Dassault Systèmes ile bağlantılı değildir, onun
+tarafından onaylanmamış ya da desteklenmemiştir. Depo ve yayım paketleri
+`EPDM.Interop.epdm.dll` dosyasını içermez.

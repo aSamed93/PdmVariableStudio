@@ -28,7 +28,7 @@ internal sealed class FakeVault : IPdmVaultContext, IPdmVariableReader, IPdmVari
 
     public VaultIdentity Vault { get; }
 
-    public string CurrentUserName { get; set; } = "atarlak";
+    public string CurrentUserName { get; set; } = "ayse";
 
     // ---- programlanabilir hatalar ----
 

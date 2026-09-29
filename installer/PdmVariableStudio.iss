@@ -20,7 +20,7 @@
 #endif
 
 #define AppName "PDM Variable Studio"
-#define AppPublisher "Samed Tarlak"
+#define AppPublisher "Abdussamed Tarlak"
 #define AppUrl "https://github.com/aSamed93/PdmVariableStudio"
 #define AppExe "PdmVariableStudio.exe"
 #define InteropDll "EPDM.Interop.epdm.dll"

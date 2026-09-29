@@ -95,8 +95,8 @@ SchemaVersion            1
 ProductVersion           1.0.0
 ExportSessionId          8f1c…-…-…
 ExportedAtUtc            2026-08-25T09:14:33.0000000Z
-ExportedByWindowsUser    ATARLAK\atarlak
-ExportedByPdmUser        atarlak
+ExportedByWindowsUser    MAKINA\ayse
+ExportedByPdmUser        ayse
 VaultName                MakinaVault
 VaultRootPath            C:\MakinaVault
 VaultDatabase            MakinaVaultDb

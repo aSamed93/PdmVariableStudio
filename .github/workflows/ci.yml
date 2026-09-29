@@ -1,0 +1,43 @@
+# Sürekli tümleştirme: Core derlenir ve birim testleri koşar.
+#
+# App ve AddIn projeleri bilerek dışarıda: ikisi de C:\Program Files\SOLIDWORKS PDM\
+# altındaki EPDM.Interop.epdm.dll'e ihtiyaç duyar ve o dosya GitHub'ın koşucularında
+# yok (Dassault Systèmes'in dosyası; depoya da konmaz). Core'un interop'suz derlenmesi
+# katman ayrımının kanıtıdır — bu iş akışı o kanıtı her PR'da yeniler.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Core derleme + birim testleri
+    runs-on: windows-latest
+    steps:
+      - name: Kaynağı al
+        uses: actions/checkout@v4
+
+      - name: .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Core derle
+        run: dotnet build src/PdmVariableStudio.Core/PdmVariableStudio.Core.csproj -c Release
+
+      - name: Testleri koştur
+        run: dotnet test tests/PdmVariableStudio.Tests -c Debug --logger "trx;LogFileName=test-results.trx"
+
+      - name: Test sonuçlarını sakla
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: '**/TestResults/*.trx'
+          if-no-files-found: ignore

@@ -1,0 +1,25 @@
+name: Özellik önerisi
+description: Yeni bir yetenek ya da mevcut bir davranışta değişiklik
+title: "[Öneri] "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: sorun
+    attributes:
+      label: Hangi sorunu çözüyor?
+      description: Bugün ne yapamıyorsunuz ya da ne zor?
+    validations:
+      required: true
+  - type: textarea
+    id: oneri
+    attributes:
+      label: Önerilen çözüm
+    validations:
+      required: true
+  - type: textarea
+    id: veri-butunlugu
+    attributes:
+      label: Veri bütünlüğüne etkisi
+      description: |
+        Bu ürünün birinci önceliği veri bütünlüğü: önizleme olmadan yazma yok, sessiz check-out yok, geri alınamayan değişiklik yok.
+        Öneri bu kurallardan birine dokunuyorsa nasıl korunacağını yazın.

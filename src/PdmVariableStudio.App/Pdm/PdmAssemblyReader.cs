@@ -23,9 +23,9 @@ namespace PdmVariableStudio.App.Pdm;
 /// (<c>RefConfiguration</c>) ve adedi (<c>RefCount</c>) doğrudan veriyor.
 /// </para>
 /// <para>
-/// <b>Gerçek vault'ta doğrulandı (2026-09-28, TEKYAZ\Nemo, UBW-21161-44621.SLDASM):</b>
+/// <b>Gerçek vault'ta doğrulandı (2026-09-28, test vault, iki seviyeli bir montaj):</b>
 /// referans ağacı hesaplanmış BOM ile aynı bileşenleri, aynı konfigürasyonları ve aynı
-/// adetleri verdi; alt montaj (44627) altındaki üç parça seviye 2'de geldi.
+/// adetleri verdi; alt montaj altındaki üç parça seviye 2'de geldi.
 /// </para>
 /// <para>
 /// <b>Tuzak:</b> <c>GetFirstChildPosition3</c>'e konfigürasyon BOŞ verilirse her bileşen

@@ -299,7 +299,7 @@ class GuideDoc(BaseDocTemplate):
         super().__init__(filename, pagesize=A4, leftMargin=MARGIN_L, rightMargin=MARGIN_R,
                          topMargin=MARGIN_T, bottomMargin=MARGIN_B,
                          title="PDM Variable Studio — Kurulum ve Kullanım Kılavuzu",
-                         author="Samed Tarlak", subject="SOLIDWORKS PDM kart değişkenleri için "
+                         author="Abdussamed Tarlak", subject="SOLIDWORKS PDM kart değişkenleri için "
                          "Excel ile toplu düzenleme aracı", creator="PDM Variable Studio",
                          lang="tr-TR", invariant=True, **kw)
         frame = Frame(MARGIN_L, MARGIN_B, CONTENT_W, PAGE_H - MARGIN_T - MARGIN_B, id="f",
