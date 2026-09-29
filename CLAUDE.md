@@ -8,7 +8,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Ne olduğu
 
-SOLIDWORKS PDM Professional 2025 eklentisi (`IEdmAddIn5`, COM, .NET Framework 4.8.1, WPF).
+SOLIDWORKS PDM Professional eklentisi (`IEdmAddIn5`, COM, .NET Framework 4.8.1, WPF).
 PDM Explorer'da Araçlar menüsünden (ya da bağlam menüsünden) açılır. Seçilen dosyaların
 **kart değişkenlerini** `.xlsx` dosyasına aktarır, kullanıcı Excel'de düzenler, dosyayı geri
 yükler; uygulama **three-way karşılaştırma** yapıp bir **önizleme** gösterir ve ancak onaydan

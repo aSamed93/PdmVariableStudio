@@ -1,6 +1,6 @@
 # PDM Variable Studio
 
-**SOLIDWORKS PDM Professional 2025 için data card değişkenlerini Excel ile toplu düzenleme
+**SOLIDWORKS PDM Professional için data card değişkenlerini Excel ile toplu düzenleme
 aracı — önizlemeli, çakışma korumalı ve geri alınabilir.**
 
 ```
