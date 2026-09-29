@@ -1,0 +1,58 @@
+name: Hata bildirimi
+description: Beklenmeyen bir davranış, hata iletisi ya da çökme
+title: "[Hata] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Teşekkürler. Aşağıdaki bilgiler sorunu yeniden üretmemizi sağlar; **Hakkında → Bilgileri Kopyala** çıktısı çoğunu tek seferde verir.
+        Çalışma kitabı (`.xlsx`) eklerken vault verisi içerdiğini unutmayın.
+  - type: textarea
+    id: ne-oldu
+    attributes:
+      label: Ne oldu?
+      description: Gördüğünüz davranış ve beklediğiniz davranış.
+    validations:
+      required: true
+  - type: textarea
+    id: adimlar
+    attributes:
+      label: Yeniden üretme adımları
+      placeholder: |
+        1. Explorer'da klasöre sağ tık → PDM Variable Studio
+        2. Dışa Aktar sekmesinde …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: akis
+    attributes:
+      label: Hangi akışta?
+      options:
+        - Dışa aktar
+        - İçe aktar / önizleme
+        - Uygula
+        - Geri al
+        - Kurulum / eklenti yükleme
+        - Diğer
+    validations:
+      required: true
+  - type: input
+    id: surum
+    attributes:
+      label: Uygulama sürümü ve PDM sürümü
+      placeholder: "Uygulama 1.2.0, eklenti 6, SOLIDWORKS PDM Professional 2025 SP3"
+    validations:
+      required: true
+  - type: textarea
+    id: bilgiler
+    attributes:
+      label: Hakkında → Bilgileri Kopyala çıktısı
+      render: text
+  - type: textarea
+    id: log
+    attributes:
+      label: studio.log ilgili satırlar
+      description: "%LOCALAPPDATA%\PdmVariableStudio\studio.log — hata anına yakın satırlar yeterli."
+      render: text

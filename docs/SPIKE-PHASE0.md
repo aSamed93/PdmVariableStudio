@@ -68,11 +68,11 @@ Thread 1 (giriş) ile thread 3 (PDM kuyruğu) farklı — yani `new EdmVault5Cla
 çalışması demek.
 
 **Sonuç:** Klasör bağlam menüsünde `mlObjectID1` doğru klasör kimliğini taşıyor.
-`TEKYAZ` vault'unda:
+Test vault'unda:
 
 ```
 [BILGI] [eklenti] Komut tetiklendi (id 3001, veri sayısı: 1).
-[BILGI] [eklenti] Seçili klasör: SPECIAL (#3).
+[BILGI] [eklenti] Seçili klasör: Projeler (#3).
 ```
 
 Araçlar menüsünden çağrıldığında ise komut verisi boş geliyor ve kod bunu doğru ele alıyor:
@@ -95,7 +95,7 @@ sessizce yanlış klasör dışa aktarılmaz.
 
 **Neden önemliydi:** Yanlış konfigürasyona yazmak sessiz veri bozulmasıdır.
 
-**Sonuç:** Mevcut model doğru. `TEKYAZ\Classified` klasöründe, konfigürasyonlu `.SLDPRT`,
+**Sonuç:** Mevcut model doğru. test vault'unun `\Parcalar` klasöründe, konfigürasyonlu `.SLDPRT`,
 `.SLDASM` ve `.SLDDRW` dosyaları üzerinde gerçek bir `Uygula` çalıştırıldı; hem `@` hem
 adlandırılmış konfigürasyon satırları aynı işlemde yazıldı ve sonuç sorunsuz.
 
@@ -170,7 +170,7 @@ bool IEdmFolder5.HasRightsEx(int lRights, int lFileID)
 İkinci parametre **DOSYA** kimliğidir, klasör değil. **Ama her hak dosya kapsamında anlamlı
 değil** — asıl bulgu bu.
 
-**Gerçek vault ölçümü** (TEKYAZ, Admin kullanıcı, üç farklı klasör, farklı iş akışı durumları
+**Gerçek vault ölçümü** (test vault, Admin kullanıcı, üç farklı klasör, farklı iş akışı durumları
 — "Under Editing" dahil):
 
 | Çağrı | Sonuç |
@@ -232,7 +232,7 @@ başarısız olduğunu sanar.
 Tazelenmiyorsa F5 / klasör değiştirip dönme ile tazelenip tazelenmediğine bakın.
 
 **Durum (2026-09-27, 🟡 kısmen):** "İşlem sonunda check-in edilsin" **açıkken** doğrulandı:
-TEKYAZ\Nemo'da 14 dosyaya 390 değer uygulandıktan sonra Explorer'da dosya seçildiğinde veri
+test vault'unda 14 dosyaya 390 değer uygulandıktan sonra Explorer'da dosya seçildiğinde veri
 kartı ve Bill of Materials sekmesi yeni değerleri gösterdi; geri almadan sonra eski değerlere
 döndü. Check-in yeni bir sürüm ürettiği için Explorer bunu kendiliğinden alıyor.
 **Açık kalan:** check-in **kapalıyken** (dosya kullanıcıda çekili kalırken) kartın tazelenip
@@ -283,12 +283,12 @@ Kanıt: `studio.log` (2026-09-20 → 2026-09-27) ve 2026-09-27 ekran kayıtları
 
 - [ ] Klasör ağacında klasöre sağ tık → **PDM Variable Studio** görünüyor — *günlük ağaç ile
   listeyi ayırt etmiyor; ayrıca denenmeli*
-- [x] Dosya listesinde bir klasöre sağ tık → görünüyor (`Seçili klasör: Nemo (#3)`; kayıtta
+- [x] Dosya listesinde bir klasöre sağ tık → görünüyor (`Seçili klasör: Projeler (#3)`; kayıtta
   görüldü)
 - [x] Bir dosyaya sağ tık → görünüyor ve **dosyanın bulunduğu klasörle** açılıyor
-  (`veri sayısı: 14` → `Seçili dosyanın klasörü kullanılıyor: Nemo (#3)`)
+  (`veri sayısı: 14` → `Seçili dosyanın klasörü kullanılıyor: Projeler (#3)`)
 - [x] Araçlar menüsünden erişilebiliyor (`veri sayısı: 0` → `klasör uygulamada seçilecek`)
-- [x] Uygulama doğru klasörle açılıyor (`--folder 3` → arayüzde `Klasör: \Nemo`)
+- [x] Uygulama doğru klasörle açılıyor (`--folder 3` → arayüzde `Klasör: \Projeler`)
 - [x] Uygulama kurulu değilse, nereye kurulması gerektiğini söyleyen mesaj çıkıyor
   (`Uygulama bulunamadı; beklenen konumlar kullanıcıya bildirildi.`)
 - [x] Pencere kapanıp tekrar açılabiliyor (aynı gün içinde 20'den fazla başlatma)
@@ -315,7 +315,7 @@ Aşağıdaki tabloyu gerçek vault'ta doldurun. Tasarım 1.000 dosya için makul
 
 | Dosya sayısı | Değişken sayısı | Tarama | Değer okuma | Excel yazma | Toplam |
 |---|---|---|---|---|---|
-| 14 (TEKYAZ, 2026-09-27) | 18 | 0,04–0,11 sn | 0,44 sn | 0,31 sn | **0,76 sn** |
+| 14 (test vault, 2026-09-27) | 18 | 0,04–0,11 sn | 0,44 sn | 0,31 sn | **0,76 sn** |
 | 100 | | | | | |
 | 1.000 | | | | | |
 | 3.000 | | | | | |
@@ -326,8 +326,8 @@ Süreler `studio.log` içindeki zaman damgalarından okunabilir.
 
 | Dosya sayısı | Hücre | İşlem | Süre | Dosya başına |
 |---|---|---|---|---|
-| 14 (TEKYAZ, 2026-09-27) | 390 | Uygula | 22,4 sn | **~1,6 sn** |
-| 14 (TEKYAZ, 2026-09-27) | 378 | Geri al | 21,4 sn | **~1,5 sn** |
+| 14 (test vault, 2026-09-27) | 390 | Uygula | 22,4 sn | **~1,6 sn** |
+| 14 (test vault, 2026-09-27) | 378 | Geri al | 21,4 sn | **~1,5 sn** |
 
 Süreyi hücre sayısı değil **dosya sayısı** belirliyor: her dosya için check-out, `Flush()` ve
 check-in birer PDM turu. Bu hızla 1.000 dosya yaklaşık **27 dakika** sürer; darboğaz okuma
@@ -342,11 +342,11 @@ hızlandırma ancak toplu check-out/check-in ile mümkün ve önce ölçülmeli.
 konfigürasyonlarla ve adetleriyle listeler. Yanlış konfigürasyon, kullanıcıyı montajda hiç
 kullanılmayan bir konfigürasyonun satırını düzenlemeye iter.
 
-**İki yol denendi**, `TEKYAZ\Nemo\UBW-21161-44621.SLDASM` (Default) üzerinde, salt okunur:
+**İki yol denendi**, test vault'undaki iki seviyeli bir montaj (`\Projeler\Montaj-01.SLDASM`, Default) üzerinde, salt okunur:
 
 | Yol | Sonuç |
 |---|---|
-| `IEdmFile5.GetReferenceTree` + `IEdmReference10.GetFirstChildPosition3` | Bileşen başına `FileID`, `FolderID`, `RefConfiguration`, `RefCount`. Alt montaj (44627) altındaki üç parça seviye 2'de geldi |
+| `IEdmFile5.GetReferenceTree` + `IEdmReference10.GetFirstChildPosition3` | Bileşen başına `FileID`, `FolderID`, `RefConfiguration`, `RefCount`. Alt montaj altındaki üç parça seviye 2'de geldi |
 | `IEdmFile7.GetComputedBOM` (şablon "BOM") | Aynı bileşenler, aynı konfigürasyonlar, aynı adetler; ama satır başına yalnızca dosya **yolu** — kimlik için ek çözümleme gerekir, ve bir şablona bağlı |
 
 **Seçilen:** referans ağacı — şablondan bağımsız, kimliği doğrudan veriyor.

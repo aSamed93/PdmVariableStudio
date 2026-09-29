@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 [assembly: AssemblyTitle("PDM Variable Studio Add-in")]
 [assembly: AssemblyDescription("PDM Variable Studio uygulamasını başlatan ince eklenti")]
-[assembly: AssemblyCompany("Atarlak")]
+[assembly: AssemblyCompany("Abdussamed Tarlak")]
 
 // Yalnızca VariableStudioAddIn sınıfı COM'a açılır; onda ayrıca [ComVisible(true)] var.
 // Assembly düzeyinde false demek, ileride eklenen public bir tipin farkında olmadan COM'a

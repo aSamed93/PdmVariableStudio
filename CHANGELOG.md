@@ -4,6 +4,21 @@ Biçim [Keep a Changelog](https://keepachangelog.com/tr/1.1.0/), sürümleme
 [SemVer](https://semver.org/lang/tr/). Uygulama sürümü ile eklenti sürümü ayrıdır; eklentiyi
 yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir.
 
+## [Yayımlanmadı]
+
+### Eklendi
+- Açık kaynak paylaşımı için topluluk dosyaları: `CONTRIBUTING.md`, `SECURITY.md`,
+  `CODE_OF_CONDUCT.md`, issue ve PR şablonları, `CODEOWNERS`.
+- GitHub Actions CI: her push ve PR'da `Core` derlenir ve birim testleri koşar (App ve
+  AddIn interop gerektirdiği için CI dışında).
+
+### Değişti
+- Telif ve yayıncı adı her yerde "Abdussamed Tarlak" (LICENSE, kurulum dosyası, PDF, eklenti
+  derleme bilgisi). Eklentideki değişiklik yalnızca Administration'da görünen şirket adı;
+  vault'a yeniden yüklemek gerekmez, yüklenecekse eklenti sürümü artırılmalıdır.
+- Belgeler ve test verilerindeki gerçek vault, klasör, parça ve kullanıcı adları genel
+  örneklerle değiştirildi; ölçüm sonuçları aynen kaldı. Davranış değişikliği yok.
+
 ## [1.2.0] — 2026-09-28
 
 ### Eklendi
@@ -67,5 +82,8 @@ yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir
 İlk sürüm. Dışa aktar → Excel → içe aktar → three-way önizleme → uygula → geri al; işlem
 günlüğü; iki süreçli mimari (ince eklenti + ayrı uygulama).
 
+[Yayımlanmadı]: https://github.com/aSamed93/PdmVariableStudio/compare/v1.2.0...HEAD
+[1.2.0]: https://github.com/aSamed93/PdmVariableStudio/compare/v1.1.1...v1.2.0
+[1.1.1]: https://github.com/aSamed93/PdmVariableStudio/compare/v1.1.0...v1.1.1
 [1.1.0]: https://github.com/aSamed93/PdmVariableStudio/compare/v1.0.0...v1.1.0
 [1.0.0]: https://github.com/aSamed93/PdmVariableStudio/releases/tag/v1.0.0

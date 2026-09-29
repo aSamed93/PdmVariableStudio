@@ -94,8 +94,8 @@ internal sealed class WorkbookFixture : IDisposable
             sourceFolderPath: "\\Parts\\Mil",
             includeSubfolders: false,
             fileFilter: "*.*",
-            windowsUser: "ATARLAK\\atarlak",
-            pdmUser: "atarlak",
+            windowsUser: "MAKINA\\ayse",
+            pdmUser: "ayse",
             Variables,
             rows);
     }

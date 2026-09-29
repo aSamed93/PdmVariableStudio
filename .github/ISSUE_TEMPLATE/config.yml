@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Kurulum ve kullanım kılavuzu
+    url: https://github.com/aSamed93/PdmVariableStudio/blob/main/docs/KULLANIM.md
+    about: Sorun bildirmeden önce kılavuzun "Sorun giderme" bölümüne bakın.
+  - name: Güvenlik açığı
+    url: https://github.com/aSamed93/PdmVariableStudio/security/advisories/new
+    about: Güvenlikle ilgili bir bulguyu herkese açık issue yerine özel bildirim ile gönderin.

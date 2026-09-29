@@ -46,7 +46,7 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
         try
         {
             addInInfo.mbsAddInName = "PDM Variable Studio";
-            addInInfo.mbsCompany = "Atarlak";
+            addInInfo.mbsCompany = "Abdussamed Tarlak";
             addInInfo.mbsDescription =
                 "Klasördeki dosyaların kart değişkenlerini Excel'e aktarır, düzenlenmiş dosyayı " +
                 "geri alır, değişiklikleri önizleme ile uygular ve güvenle geri alır.";
