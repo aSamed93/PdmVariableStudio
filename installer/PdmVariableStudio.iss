@@ -1,7 +1,7 @@
 ﻿; PDM Variable Studio — Inno Setup 6 kurulum betiği.
 ;
 ; Derleme: docs\build-installer.ps1 (sürümü ProductInfo.Version'dan okuyup /DAppVersion ile
-; geçirir). Elle: ISCC.exe /DAppVersion=1.2.0 installer\PdmVariableStudio.iss
+; geçirir). Elle: ISCC.exe /DAppVersion=1.3.0 installer\PdmVariableStudio.iss
 ;
 ; Kurulum ne yapar:
 ;   1. .NET Framework 4.8.1 yoksa Microsoft'un web yükleyicisini indirip çalıştırır.

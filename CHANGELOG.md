@@ -6,6 +6,8 @@ yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir
 
 ## [Yayımlanmadı]
 
+## [1.3.0] — 2026-09-30
+
 ### Eklendi
 - **İngilizce arayüz (eklenti güncellendi):** uygulama, eklenti ve kurulum Türkçe ve
   İngilizce çalışır. Tek kurulum ve tek eklenti; dil istemci başına seçilir: uygulamadaki dil

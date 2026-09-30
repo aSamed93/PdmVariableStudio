@@ -27,7 +27,7 @@ PDM Explorer'da klasöre sağ tık
 | **Hedef** | SOLIDWORKS PDM Professional 2022 (30.0) ve üstü; 2025 (33.5) üzerinde geliştirildi |
 | **Platform** | .NET Framework 4.8.1, WPF, AnyCPU |
 | **Dil** | Türkçe ve İngilizce — tek kurulum, tek eklenti; dil kullanıcı başına seçilir ([ayrıntı](docs/KULLANIM.md#arayüz-dili)) |
-| **Ürün sürümü** | 1.2.0 — [değişiklikler](CHANGELOG.md) |
+| **Ürün sürümü** | 1.3.0 — [değişiklikler](CHANGELOG.md) |
 | **Lisans** | [MIT](LICENSE) — ücretsiz, lisans anahtarı yok |
 | **Gizlilik** | Hiçbir yere veri göndermez; günlük ve geçmiş yalnızca yerel diskte |
 | **Test** | 154 birim testi, PDM istemcisi olmadan koşar — [![CI](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml/badge.svg)](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml) |
