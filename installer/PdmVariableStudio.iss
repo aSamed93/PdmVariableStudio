@@ -1,7 +1,7 @@
 ﻿; PDM Variable Studio — Inno Setup 6 kurulum betiği.
 ;
 ; Derleme: docs\build-installer.ps1 (sürümü ProductInfo.Version'dan okuyup /DAppVersion ile
-; geçirir). Elle: ISCC.exe /DAppVersion=1.2.0 installer\PdmVariableStudio.iss
+; geçirir). Elle: ISCC.exe /DAppVersion=1.3.0 installer\PdmVariableStudio.iss
 ;
 ; Kurulum ne yapar:
 ;   1. .NET Framework 4.8.1 yoksa Microsoft'un web yükleyicisini indirip çalıştırır.
@@ -11,6 +11,10 @@
 ;   4. HKLM\SOFTWARE\PdmVariableStudio\InstallPath yazar (eklenti uygulamayı buradan bulur).
 ;   5. {app}\AddIn\ altına eklenti DLL'i + interop kopyasını koyar: kullanıcı bu iki dosyayı
 ;      Administration ile vault'a yükler. Bu adım otomatikleştirilemez (PDM yönetici işi).
+;   6. Sihirbazın dilini (tr/en) HKLM\SOFTWARE\PdmVariableStudio\Language'a yazar: uygulama
+;      ve eklenti bu makinede o dilde açılır (kullanıcı uygulamada değiştirebilir, HKCU).
+;      İki dil için ayrı kurulum YOK — eklenti vault'ta tektir ve her istemci kendi dilini
+;      seçer; iki ayrı paket, aynı vault'u kullanan farklı dilli istemcileri bölerdi.
 ;
 ; Kaldırma %LOCALAPPDATA%\PdmVariableStudio\ altına DOKUNMAZ: işlem geçmişi silinirse
 ; yapılmış bir değişiklik geri alınamaz hâle gelir.
@@ -95,10 +99,13 @@ Source: "{code:PdmInteropPath}"; DestDir: "{app}"; Flags: external ignoreversion
 ; Eklenti paketi: kullanıcı bu klasördeki iki dosyayı vault'a yükler.
 Source: "{#AddInBin}\PdmVariableStudio.AddIn.dll"; DestDir: "{app}\AddIn"; Flags: ignoreversion
 Source: "{code:PdmInteropPath}"; DestDir: "{app}\AddIn"; Flags: external ignoreversion
-Source: "AddIn-BENIOKU.txt"; DestDir: "{app}\AddIn"; DestName: "BENIOKU.txt"; Flags: ignoreversion
+Source: "AddIn-BENIOKU.txt"; DestDir: "{app}\AddIn"; DestName: "BENIOKU.txt"; Languages: tr; Flags: ignoreversion
+Source: "AddIn-README.txt"; DestDir: "{app}\AddIn"; DestName: "README.txt"; Languages: en; Flags: ignoreversion
 ; Belgeler — kılavuz kısayolu PDF'i açar (.md her bilgisayarda okunaklı açılmıyor).
 Source: "..\docs\PdmVariableStudio-Kurulum-ve-Kullanim.pdf"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\docs\PdmVariableStudio-Installation-and-User-Guide.pdf"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\docs\KULLANIM.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\docs\USAGE.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\CHANGELOG.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreversion
 
@@ -106,10 +113,17 @@ Source: "..\LICENSE"; DestDir: "{app}"; DestName: "LICENSE.txt"; Flags: ignoreve
 ; Eklenti (AddIn/AppLocator.cs) uygulamayı önce buradan arar.
 Root: HKLM; Subkey: "SOFTWARE\PdmVariableStudio"; Flags: uninsdeletekeyifempty
 Root: HKLM; Subkey: "SOFTWARE\PdmVariableStudio"; ValueType: string; ValueName: "InstallPath"; ValueData: "{app}"; Flags: uninsdeletevalue
+; Makine varsayılan dili = sihirbazın dili ("tr" / "en"; [Languages] adları bilerek bu kodlar).
+; Uygulama (App/LanguagePreference.cs) ve eklenti (AddIn/AddInText.cs) okur; kullanıcının
+; uygulamada seçtiği dil (HKCU) bunu geçer.
+Root: HKLM; Subkey: "SOFTWARE\PdmVariableStudio"; ValueType: string; ValueName: "Language"; ValueData: "{language}"; Flags: uninsdeletevalue
 
 [Icons]
 Name: "{group}\{#AppName}"; Filename: "{app}\{#AppExe}"
-Name: "{group}\{cm:Guide}"; Filename: "{app}\PdmVariableStudio-Kurulum-ve-Kullanim.pdf"
+; Kılavuz kısayolu sihirbazın dilindeki PDF'i açar; iki PDF de kurulur (makineyi farklı
+; dilde kullanan başka bir kullanıcı için).
+Name: "{group}\{cm:Guide}"; Filename: "{app}\PdmVariableStudio-Kurulum-ve-Kullanim.pdf"; Languages: tr
+Name: "{group}\{cm:Guide}"; Filename: "{app}\PdmVariableStudio-Installation-and-User-Guide.pdf"; Languages: en
 Name: "{group}\{cm:AddInHint}"; Filename: "{app}\AddIn"
 Name: "{group}\{cm:UninstallProgram,{#AppName}}"; Filename: "{uninstallexe}"
 

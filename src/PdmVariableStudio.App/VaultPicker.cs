@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.App;
 
@@ -28,7 +29,7 @@ internal static class VaultPicker
 
         var ok = new Button
         {
-            Content = "Aç",
+            Content = Loc.T("Aç", "Open"),
             IsDefault = true,
             MinWidth = 90,
             Padding = new Thickness(14, 6, 14, 6),
@@ -37,7 +38,7 @@ internal static class VaultPicker
 
         var cancel = new Button
         {
-            Content = "İptal",
+            Content = Loc.T("İptal", "Cancel"),
             IsCancel = true,
             MinWidth = 90,
             Padding = new Thickness(14, 6, 14, 6),
@@ -56,7 +57,7 @@ internal static class VaultPicker
 
         var caption = new TextBlock
         {
-            Text = "Hangi vault ile çalışmak istiyorsunuz?",
+            Text = Loc.T("Hangi vault ile çalışmak istiyorsunuz?", "Which vault do you want to work with?"),
             Margin = new Thickness(0, 0, 0, 10),
             FontWeight = FontWeights.SemiBold,
         };

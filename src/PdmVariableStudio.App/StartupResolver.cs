@@ -1,6 +1,7 @@
 using System;
 using System.Windows;
 using PdmVariableStudio.Core.Abstractions;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.App;
 
@@ -53,10 +54,15 @@ internal static class StartupResolver
             if (vaults.Count == 0)
             {
                 MessageBox.Show(
-                    "Bu bilgisayarda kayıtlı bir PDM vault view'ı bulunamadı." + Environment.NewLine +
-                    Environment.NewLine +
-                    "SOLIDWORKS PDM istemcisinin kurulu ve en az bir vault view'ının " +
-                    "oluşturulmuş olması gerekiyor.",
+                    Loc.T(
+                        "Bu bilgisayarda kayıtlı bir PDM vault view'ı bulunamadı." + Environment.NewLine +
+                        Environment.NewLine +
+                        "SOLIDWORKS PDM istemcisinin kurulu ve en az bir vault view'ının " +
+                        "oluşturulmuş olması gerekiyor.",
+                        "No PDM vault view is registered on this computer." + Environment.NewLine +
+                        Environment.NewLine +
+                        "The SOLIDWORKS PDM client must be installed and at least one vault view " +
+                        "must have been created."),
                     "PDM Variable Studio",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);

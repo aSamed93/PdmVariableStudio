@@ -6,6 +6,7 @@ using PdmVariableStudio.Core.Diff;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Journal;
 using PdmVariableStudio.Core.Results;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Services;
 
@@ -41,13 +42,13 @@ public sealed class UndoCandidate
 
     public string StatusText => Status switch
     {
-        UndoStatus.SafeUndo => "Güvenli",
-        UndoStatus.AlreadyReverted => "Zaten geri alınmış",
-        UndoStatus.Conflict => "Çakışma",
-        UndoStatus.Unavailable => "Kullanılamaz",
-        UndoStatus.Reverted => "Geri alındı",
-        UndoStatus.Failed => "Başarısız",
-        _ => "Atlandı",
+        UndoStatus.SafeUndo => Loc.T("Güvenli", "Safe"),
+        UndoStatus.AlreadyReverted => Loc.T("Zaten geri alınmış", "Already reverted"),
+        UndoStatus.Conflict => Loc.T("Çakışma", "Conflict"),
+        UndoStatus.Unavailable => Loc.T("Kullanılamaz", "Unavailable"),
+        UndoStatus.Reverted => Loc.T("Geri alındı", "Reverted"),
+        UndoStatus.Failed => Loc.T("Başarısız", "Failed"),
+        _ => Loc.T("Atlandı", "Skipped"),
     };
 }
 
@@ -139,7 +140,7 @@ public sealed class UndoService
         IProgress<string>? progress = null,
         CancellationToken cancellationToken = default)
     {
-        progress?.Report("İşlem kaydı okunuyor");
+        progress?.Report(Loc.T("İşlem kaydı okunuyor", "Reading operation record"));
 
         var load = _journal.LoadOperation(_vault.Vault, operationId);
         if (load.IsFailure)
@@ -156,7 +157,7 @@ public sealed class UndoService
                 $"Bu işlem {operation.UndoneByOperationId:D} tarafından geri alınmış.");
         }
 
-        progress?.Report("PDM güncel değerleri okunuyor");
+        progress?.Report(Loc.T("PDM güncel değerleri okunuyor", "Reading current PDM values"));
 
         var snapshots = ReadCurrentSnapshots(operation, cancellationToken);
         var candidates = new List<UndoCandidate>(operation.Entries.Count);
@@ -276,8 +277,9 @@ public sealed class UndoService
         if (string.IsNullOrWhiteSpace(options.CheckInComment)
             || options.CheckInComment == new ApplyOptions().CheckInComment)
         {
-            options.CheckInComment =
-                $"PDM Variable Studio: {preview.Operation.UtcTimestamp:yyyy-MM-dd HH:mm} işleminin geri alınması";
+            options.CheckInComment = Loc.T(
+                $"PDM Variable Studio: {preview.Operation.UtcTimestamp:yyyy-MM-dd HH:mm} işleminin geri alınması",
+                $"PDM Variable Studio: undo of the {preview.Operation.UtcTimestamp:yyyy-MM-dd HH:mm} operation");
         }
 
         var changeSet = BuildChangeSet(preview);

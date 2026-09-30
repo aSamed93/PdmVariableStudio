@@ -6,7 +6,23 @@ yeniden yüklemek gereken sürümler **(eklenti güncellendi)** ile işaretlenir
 
 ## [Yayımlanmadı]
 
+## [1.3.0] — 2026-09-30
+
 ### Eklendi
+- **İngilizce arayüz (eklenti güncellendi):** uygulama, eklenti ve kurulum Türkçe ve
+  İngilizce çalışır. Tek kurulum ve tek eklenti; dil istemci başına seçilir: uygulamadaki dil
+  kutusu (`HKCU\SOFTWARE\PdmVariableStudio\Language`) > kurulumda seçilen dil (`HKLM\...`,
+  sihirbazın dili yazılır) > Windows dili (Türkçe değilse İngilizce). Dil kutusundan
+  değiştirince uygulama yeniden başlatmayı önerir. Çalışma kitabı başlıkları dışa aktarımın
+  dilinde yazılır; bir dilde dışa aktarılan kitap öbür dilde sorunsuz içe aktarılır. Şema
+  sürümü değişmedi; sayı ve tarih biçimi dile değil Windows bölge ayarına bağlı kalır.
+  `studio.log` Türkçe kalır. Eklenti sürümü 7: menü ipucu ve hata iletileri seçilen dilde.
+- İngilizce kılavuz: PDF (`docs/PdmVariableStudio-Installation-and-User-Guide.pdf`) ve kısa
+  hâli `docs/USAGE.md`. İki PDF aynı kaynaktan (`docs/guide/build_guide.py`, metinler
+  `T("tr", "en")` ile yan yana) üretilir; kurulum ikisini de kurar, kılavuz kısayolu
+  sihirbazın dilindekini açar. Yayım paketine `USAGE.md` ve İngilizce `README.txt` eklendi.
+- Türkçe PDF kılavuza *4.9 Arayüz dili* bölümü; gereksiz sayfa sonları kaldırıldı (17 → 14
+  sayfa).
 - Açık kaynak paylaşımı için topluluk dosyaları: `CONTRIBUTING.md`, `SECURITY.md`,
   `CODE_OF_CONDUCT.md`, issue ve PR şablonları, `CODEOWNERS`.
 - GitHub Actions CI: her push ve PR'da `Core` derlenir ve birim testleri koşar (App ve

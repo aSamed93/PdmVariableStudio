@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using PdmVariableStudio.App.Views;
 using PdmVariableStudio.Core.Diagnostics;
+using PdmVariableStudio.Core.Localization;
 using PdmVariableStudio.Core.Workbook;
 
 namespace PdmVariableStudio.App;
@@ -32,6 +33,9 @@ namespace PdmVariableStudio.App;
 /// </remarks>
 internal static class Program
 {
+    /// <summary>Etkin dilin nereden geldiği; Hakkında penceresi gösterir.</summary>
+    public static LanguageSource LanguageSource { get; private set; }
+
     [STAThread]
     private static int Main(string[] args)
     {
@@ -60,10 +64,17 @@ internal static class Program
             e.SetObserved();
         };
 
+        // Dil, kullanıcıya görünen İLK metinden önce seçilir: aşağıdaki hata iletileri de
+        // seçilen dilde çıksın. Süreç boyunca değişmez (bkz. Loc).
+        var language = LanguagePreference.Resolve(log, out var languageSource);
+        Loc.SetCurrent(language);
+        LanguageSource = languageSource;
+
         try
         {
             var options = StartupOptions.Parse(args);
-            log.Info($"Uygulama başlatıldı. Sürüm {ProductInfo.Version}. {options}");
+            log.Info($"Uygulama başlatıldı. Sürüm {ProductInfo.Version}. {options}, " +
+                     $"dil {UiLanguages.ToCode(language)} ({languageSource}).");
 
             // Başlangıçta OnExplicitShutdown: vault seçme penceresi ana pencereden ÖNCE
             // açılıyor ve kapandığında "son pencere kapandı" sayılıp uygulama daha
@@ -91,9 +102,10 @@ internal static class Program
                 e.Handled = true;
 
                 MessageBox.Show(
-                    "Beklenmeyen bir hata oluştu; son işlem yarıda kalmış olabilir." +
+                    Loc.T("Beklenmeyen bir hata oluştu; son işlem yarıda kalmış olabilir.",
+                          "An unexpected error occurred; the last operation may be incomplete.") +
                     Environment.NewLine + Environment.NewLine +
-                    "Ayrıntılı günlük: " + log.FilePath,
+                    Loc.T("Ayrıntılı günlük: ", "Detailed log: ") + log.FilePath,
                     "PDM Variable Studio",
                     MessageBoxButton.OK,
                     MessageBoxImage.Warning);
@@ -123,8 +135,9 @@ internal static class Program
             log.Error("Uygulama başlatılamadı.", exception);
 
             MessageBox.Show(
-                "PDM Variable Studio başlatılamadı." + Environment.NewLine + Environment.NewLine +
-                "Ayrıntılı günlük: " + log.FilePath,
+                Loc.T("PDM Variable Studio başlatılamadı.", "PDM Variable Studio could not be started.") +
+                Environment.NewLine + Environment.NewLine +
+                Loc.T("Ayrıntılı günlük: ", "Detailed log: ") + log.FilePath,
                 "PDM Variable Studio",
                 MessageBoxButton.OK,
                 MessageBoxImage.Error);

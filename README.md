@@ -3,6 +3,11 @@
 **SOLIDWORKS PDM Professional için data card değişkenlerini Excel ile toplu düzenleme
 aracı — önizlemeli, çakışma korumalı ve geri alınabilir.**
 
+> **English:** the application and the PDM add-in are available in English and Turkish — one
+> setup, the language follows Windows or the choice made in setup / in the app. English
+> guide: [Installation and User Guide (PDF)](docs/PdmVariableStudio-Installation-and-User-Guide.pdf),
+> short version [docs/USAGE.md](docs/USAGE.md).
+
 ```
 PDM Explorer'da klasöre sağ tık
         ↓
@@ -21,10 +26,11 @@ PDM Explorer'da klasöre sağ tık
 |---|---|
 | **Hedef** | SOLIDWORKS PDM Professional 2022 (30.0) ve üstü; 2025 (33.5) üzerinde geliştirildi |
 | **Platform** | .NET Framework 4.8.1, WPF, AnyCPU |
-| **Ürün sürümü** | 1.2.0 — [değişiklikler](CHANGELOG.md) |
+| **Dil** | Türkçe ve İngilizce — tek kurulum, tek eklenti; dil kullanıcı başına seçilir ([ayrıntı](docs/KULLANIM.md#arayüz-dili)) |
+| **Ürün sürümü** | 1.3.0 — [değişiklikler](CHANGELOG.md) |
 | **Lisans** | [MIT](LICENSE) — ücretsiz, lisans anahtarı yok |
 | **Gizlilik** | Hiçbir yere veri göndermez; günlük ve geçmiş yalnızca yerel diskte |
-| **Test** | 136 birim testi, PDM istemcisi olmadan koşar — [![CI](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml/badge.svg)](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml) |
+| **Test** | 154 birim testi, PDM istemcisi olmadan koşar — [![CI](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml/badge.svg)](https://github.com/aSamed93/PdmVariableStudio/actions/workflows/ci.yml) |
 | **Durum** | Gerçek vault'ta uçtan uca doğrulandı (dışa aktar → düzenle → içe aktar → uygula → geri al) |
 
 > **Kurulum ve kullanım kılavuzu (PDF):**
@@ -204,6 +210,8 @@ dotnet test tests/PdmVariableStudio.Tests -c Debug
 |---|---|
 | [docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf](docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf) | **Kurulum ve kullanım kılavuzu (PDF):** indirme, kurulum, eklenti, kullanım, sorun giderme, kaldırma |
 | [docs/KULLANIM.md](docs/KULLANIM.md) | Son kullanıcı kılavuzunun kısa hâli (yayım paketine de girer) |
+| [docs/PdmVariableStudio-Installation-and-User-Guide.pdf](docs/PdmVariableStudio-Installation-and-User-Guide.pdf) | PDF kılavuzun İngilizcesi (aynı kaynaktan üretilir) |
+| [docs/USAGE.md](docs/USAGE.md) | Kısa kılavuzun İngilizcesi (yayım paketine girer) |
 | [CHANGELOG.md](CHANGELOG.md) | Sürüm notları |
 | [CLAUDE.md](CLAUDE.md) | Mimari kararların gerekçeleri ve **dokunmadan önce bilinmesi gerekenler** (adı yapay zekâ araçlarına hitap eder, içerik her katkıcı için) |
 | [CONTRIBUTING.md](CONTRIBUTING.md) | Katkı süreci, geliştirme ortamı, stil |

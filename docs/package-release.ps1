@@ -6,8 +6,10 @@
 #     AddIn\                  PdmVariableStudio.AddIn.dll       — interop YOK
 #     install-app.ps1         uygulamayı kurar, interop'u PDM istemcisinden alır
 #     KULLANIM.md             son kullanıcı kılavuzu
+#     USAGE.md                aynı kılavuzun İngilizcesi
 #     CHANGELOG.md, LICENSE
 #     BENIOKU.txt             üç adımlık özet
+#     README.txt              aynı özetin İngilizcesi
 #   PdmVariableStudio-<sürüm>.zip
 #   PdmVariableStudio-<sürüm>.zip.sha256
 #
@@ -92,6 +94,7 @@ Copy-Item $addInPath (Join-Path $stage 'AddIn')
 
 Copy-Item (Join-Path $PSScriptRoot 'install-app.ps1') $stage
 Copy-Item (Join-Path $PSScriptRoot 'KULLANIM.md') $stage
+Copy-Item (Join-Path $PSScriptRoot 'USAGE.md') $stage
 Copy-Item (Join-Path $root 'CHANGELOG.md') $stage
 Copy-Item (Join-Path $root 'LICENSE') $stage
 
@@ -116,6 +119,29 @@ Ayrinti ve sorun giderme: KULLANIM.md
 Gereksinim: SOLIDWORKS PDM Professional 2022 (30.0) veya ustu, .NET Framework 4.8.1
 "@
 Set-Content -Path (Join-Path $stage 'BENIOKU.txt') -Value $readme -Encoding UTF8
+
+$readmeEnglish = @"
+PDM Variable Studio $version
+============================
+
+Three steps:
+
+1. Application: in an administrator PowerShell, in this folder
+       powershell -ExecutionPolicy Bypass -File install-app.ps1
+
+2. Add-in: PDM Administration -> vault -> Add-ins -> right-click -> New Add-in
+   Select these TWO files together:
+       AddIn\PdmVariableStudio.AddIn.dll
+       C:\Program Files\SOLIDWORKS PDM\EPDM.Interop.epdm.dll
+   (the second one is NOT in the package; it comes with your PDM client)
+
+3. Close and reopen all PDM Explorer windows.
+
+The interface follows the Windows language (Turkish or English) and can be changed in the
+application's language box. Details and troubleshooting: USAGE.md
+Requirements: SOLIDWORKS PDM Professional 2022 (30.0) or later, .NET Framework 4.8.1
+"@
+Set-Content -Path (Join-Path $stage 'README.txt') -Value $readmeEnglish -Encoding UTF8
 
 Compress-Archive -Path $stage -DestinationPath $zip -CompressionLevel Optimal
 

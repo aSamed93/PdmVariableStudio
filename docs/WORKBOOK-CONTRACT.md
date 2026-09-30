@@ -30,6 +30,15 @@ Kaynak: [`src/PdmVariableStudio.Core/Workbook/WorkbookSchema.cs`](../src/PdmVari
 | D | Konfigürasyon | kilitli | boş = dosya düzeyi |
 | E… | değişken adları | **düzenlenebilir** | salt okunur değişkenlerde başlık `(salt okunur)` ile biter ve sütun kilitlidir |
 
+Başlıklar **dışa aktarım anındaki arayüz dilinde** yazılır: İngilizcede `File Name`, `Folder`,
+`Configuration`, salt okunur eki `(read-only)`, montaj sütunları `Assembly: Parent assembly`,
+`Assembly: Level`, `Assembly: Quantity`. Şema sürümü bu yüzden değişmedi: okuyucu teknik
+sütunları başlıktan değil sabit indisten, değişken sütunlarını `_Metadata`'daki `ColumnIndex`
+tablosundan bulur. Başlığa yalnızca taşınmış bir değişken sütununu yeniden bulmak için bakılır
+ve orada salt okunur ekinin **iki dildeki biçimi de** tanınır — bir dilde dışa aktarılan kitap
+öbür dilde sorunsuz içe aktarılır (`LocalizationTests`). Sayfa adları (`Variables`,
+`_Metadata`, `_Rows`) ve `_Metadata` anahtarları dile bağlı değildir.
+
 Örnek:
 
 | # | Dosya Adı | Klasör | Konfigürasyon | Açıklama | Malzeme | Ağırlık | Yayım Tarihi | Revizyon (salt okunur) |

@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using PdmVariableStudio.Core.Domain;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Workbook;
 
@@ -46,10 +47,29 @@ public static class WorkbookSchema
     /// <summary>İlk değişken sütununun indisi. Öncesindeki sütunlar teknik ve kilitlidir.</summary>
     public const int FirstVariableColumn = 5;
 
+    // Başlıklar dışa aktarım anındaki arayüz dilinde yazılır. Okuyucu teknik sütunları
+    // başlıktan değil sabit indisten, değişken sütunlarını _Metadata'dan bulduğu için
+    // İngilizce dışa aktarılmış bir kitap Türkçe arayüzde (ve tersi) sorunsuz okunur.
     public const string HeaderExportRowId = "#";
-    public const string HeaderFileName = "Dosya Adı";
-    public const string HeaderRelativePath = "Klasör";
-    public const string HeaderConfiguration = "Konfigürasyon";
+
+    public static string HeaderFileName => Loc.T("Dosya Adı", "File Name");
+
+    public static string HeaderRelativePath => Loc.T("Klasör", "Folder");
+
+    public static string HeaderConfiguration => Loc.T("Konfigürasyon", "Configuration");
+
+    /// <summary>Salt okunur değişkenin başlığına eklenen, etkin dildeki ek.</summary>
+    public static string ReadOnlySuffix => Loc.T(" (salt okunur)", " (read-only)");
+
+    /// <summary>
+    /// Okuyucunun tanıdığı tüm salt okunur ekleri. Kitap hangi dilde dışa aktarıldıysa
+    /// onunki kullanılmıştır; okuyan arayüzün dili farklı olabilir.
+    /// </summary>
+    public static IReadOnlyList<string> KnownReadOnlySuffixes { get; } = new[]
+    {
+        " (salt okunur)",
+        " (read-only)",
+    };
 
     /// <summary>
     /// Montajdan dışa aktarımda <see cref="ColConfiguration"/> ile ilk değişken sütunu arasına
@@ -67,14 +87,15 @@ public static class WorkbookSchema
     /// </para>
     /// <para>
     /// Başlıklar "Montaj:" önekiyle başlar ki bir vault değişkeninin görünen adıyla (ör.
-    /// "Adet") çakışıp sütun yeri kaymış bir değişken sanılmasın.
+    /// "Adet") çakışıp sütun yeri kaymış bir değişken sanılmasın. İngilizcede aynı amaçla
+    /// "Assembly:" öneki kullanılır.
     /// </para>
     /// </remarks>
-    public static IReadOnlyList<string> AssemblyInfoHeaders { get; } = new[]
+    public static IReadOnlyList<string> AssemblyInfoHeaders => new[]
     {
-        "Montaj: Üst montaj",
-        "Montaj: Seviye",
-        "Montaj: Adet",
+        Loc.T("Montaj: Üst montaj", "Assembly: Parent assembly"),
+        Loc.T("Montaj: Seviye", "Assembly: Level"),
+        Loc.T("Montaj: Adet", "Assembly: Quantity"),
     };
 
     // --------------------------------------------------------------- _Rows sayfası

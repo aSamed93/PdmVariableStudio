@@ -3,6 +3,7 @@ using System.IO;
 using Microsoft.Win32;
 using PdmVariableStudio.Core.Abstractions;
 using PdmVariableStudio.Core.Journal;
+using PdmVariableStudio.Core.Localization;
 using PdmVariableStudio.Core.Settings;
 
 namespace PdmVariableStudio.App;
@@ -34,9 +35,9 @@ internal sealed class JournalRoot
 
     public string SourceText => Source switch
     {
-        JournalRootSource.MachinePolicy => "makine ilkesi (HKLM)",
-        JournalRootSource.UserSettings => "kullanıcı ayarı (settings.json)",
-        _ => "varsayılan",
+        JournalRootSource.MachinePolicy => Loc.T("makine ilkesi (HKLM)", "machine policy (HKLM)"),
+        JournalRootSource.UserSettings => Loc.T("kullanıcı ayarı (settings.json)", "user setting (settings.json)"),
+        _ => Loc.T("varsayılan", "default"),
     };
 }
 
