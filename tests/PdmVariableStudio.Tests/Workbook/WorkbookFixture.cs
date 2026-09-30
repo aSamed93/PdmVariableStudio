@@ -108,6 +108,21 @@ internal sealed class WorkbookFixture : IDisposable
 
     public ImportedWorkbook Read() => new WorkbookReader().Read(Path_);
 
+    /// <summary>Değişkenler sayfasının başlık satırı, soldan sağa.</summary>
+    public IReadOnlyList<string> Headers()
+    {
+        using var document = SpreadsheetDocument.Open(Path_, isEditable: false);
+        var workbookPart = document.WorkbookPart!;
+        var sheet = workbookPart.Workbook.Descendants<Sheet>().First(s => s.Name?.Value == WorkbookSchema.VariablesSheet);
+        var part = (WorksheetPart)workbookPart.GetPartById(sheet.Id!.Value!);
+        var header = part.Worksheet.Descendants<Row>().First(r => r.RowIndex?.Value == 1);
+
+        return header.Elements<Cell>()
+            .OrderBy(c => WorkbookReader.ColumnIndex(c.CellReference?.Value))
+            .Select(c => c.InlineString?.Text?.Text ?? c.CellValue?.Text ?? string.Empty)
+            .ToList();
+    }
+
     // ------------------------------------------------------- bozma yardımcıları
 
     /// <summary>Bir hücrenin metin değerini değiştirir; yoksa oluşturur.</summary>

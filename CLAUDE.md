@@ -3,8 +3,10 @@
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 > **Dil kuralı:** Tanımlayıcılar (sınıf, metot, alan, enum) **İngilizce**; XML doküman
-> etiketleri, kod yorumları, belgeler ve kullanıcıya görünen tüm metinler **Türkçe**.
-> Bu ayrım bilinçli ve kardeş projelerle (PDMetry, ErpSecim) aynı. Bu düzeni koru.
+> etiketleri, kod yorumları, belgeler ve günlük (`studio.log`) satırları **Türkçe**.
+> Kullanıcıya görünen metinler **iki dilli** — Türkçe ve İngilizce, yan yana
+> (`Loc.T("…", "…")`; bkz. *Arayüz dili*). Bu ayrım bilinçli ve kardeş projelerle
+> (PDMetry, ErpSecim) aynı. Bu düzeni koru.
 
 ## Ne olduğu
 
@@ -25,7 +27,7 @@ dotnet build PdmVariableStudio.sln -c Release
 dotnet test tests/PdmVariableStudio.Tests -c Debug
 powershell -File docs/verify-package.ps1      # iki paketin dosya listesini denetler
 powershell -File docs/install-app.ps1         # uygulamayı kurar, kayıt defteri değerini yazar
-python docs/guide/build_guide.py              # kurulum ve kullanım kılavuzunu (PDF) yeniden üretir
+python docs/guide/build_guide.py              # kurulum ve kullanım kılavuzunu (PDF, tr + en) yeniden üretir
 ```
 
 Tek bir test sınıfı ya da testi çalıştırmak (xUnit, `FullyQualifiedName` ile süzülür;
@@ -54,11 +56,15 @@ Lint/format aracı yok; stil kaynak dosyaların kendisidir.
 
 ### Kullanıcı kılavuzu (PDF)
 
-`docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf` **üretilmiş bir dosyadır**; kaynağı
-`docs/guide/build_guide.py` (metin, tablolar ve bölümler betiğin içinde). PDF'i elle
+`docs/PdmVariableStudio-Kurulum-ve-Kullanim.pdf` ve İngilizcesi
+`docs/PdmVariableStudio-Installation-and-User-Guide.pdf` **üretilmiş dosyalardır**; kaynakları
+tek: `docs/guide/build_guide.py` (metin, tablolar ve bölümler betiğin içinde; her metin
+`T("Türkçe", "English")` ile yan yana — uygulamadaki `Loc.T` gibi). PDF'leri elle
 düzenlemeyin. Arayüzde bir düğme adı, durum, ayar ya da kurulum adımı değiştiğinde betiği
-aynı değişiklikle güncelleyip PDF'i yeniden üretin ve ikisini birlikte commit edin —
-`docs/KULLANIM.md` de aynı içeriğin kısa hâlidir, o da güncellenir. Tek bağımlılık
+aynı değişiklikle **iki dilde** güncelleyip PDF'leri yeniden üretin ve hepsini birlikte commit
+edin. İngilizce metindeki düğme/durum adları uygulamanın İngilizce arayüzündekiyle birebir
+aynı olmalı. `docs/KULLANIM.md` ve `docs/USAGE.md` aynı içeriğin kısa hâlleridir, onlar da
+güncellenir. Tek bağımlılık
 `reportlab` (`docs/guide/requirements.txt`); derlemeyi ve testleri etkilemez. Sürüm
 numarası `ProductInfo.Version`'dan okunur, çıktı deterministiktir (aynı kaynak → aynı bayt).
 
@@ -149,7 +155,9 @@ Dört akış servisi (`Core/Services/`) bu arayüzleri alır ve `OperationOutcom
 (`IssueCode` + `IssueSeverity` + bağlam) ile taşınır. Kullanıcıya gösterilen metin
 `Results/IssueCode.cs` içindeki `IssueText`'ten gelir; COM hataları `App/Pdm/PdmErrorTranslator.cs`
 ile `IssueCode`'a çevrilir (bilinen HRESULT → PDM'in `GetErrorName` metni → genel kod +
-günlüğe tam ayrıntı). Yeni bir hata durumu eklerken önce `IssueCode` + Türkçe metin ekleyin.
+günlüğe tam ayrıntı). Yeni bir hata durumu eklerken önce `IssueCode` + Türkçe **ve** İngilizce
+metin ekleyin (`LocalizationTests` eksik İngilizceyi yakalar). `TechnicalDetail` yalnızca
+günlüğe gider ve Türkçe kalır.
 
 **App tarafında kablolama** tek yerde: `App/ViewModels/StudioViewModel.cs` içinde, vault
 oturumu açıldıktan sonra `_queue.RunAsync` bloğunda tüm adaptörler ve servisler kurulur.
@@ -272,6 +280,34 @@ Hiçbir dosya kullanıcının açık onayı olmadan check-out edilmez (`ApplyOpt
 Check-in **yalnızca bizim çektiğimiz** dosyalar için yapılır — kullanıcının kendi işi için
 çekili tuttuğu bir dosyayı iade etmek onun işini bozar (`FileApplyPlan.WeCheckedOut`).
 Yazma başarısız olursa kendi check-out'umuz geri alınır; dosyada iz bırakmayız.
+
+### Arayüz dili: tek derleme, tek kurulum, dil çalışma anında
+
+Türkçe ve İngilizce için **ayrı derleme ya da ayrı kurulum yok.** Gerekçe eklentide: vault'a
+yüklenen eklenti vault başına tektir ve aynı vault'u farklı dilli istemciler kullanır; dil
+paketi ayırmak bu istemcileri bölerdi. Dil her süreçte, her istemcide ayrı seçilir.
+
+- **Mekanizma:** `Core/Localization/Loc.cs` — `Loc.T(tr, en)`, sayı + ad için `Loc.N(n, "dosya",
+  "file", "files")`. XAML'de `{views:T 'Dışa Aktar', 'Export'}` (`App/Views/TExtension.cs`);
+  metindeki kesme işareti `\'` ile kaçırılır (`'Excel\'de Aç'`). Sayı + ad rozetleri
+  `CountNounConverter` ile. **`.resx` kullanılmıyor:** uydu derlemeler (`en\*.resources.dll`)
+  kurulum klasörüne alt klasör ve "eksik kopyalanan dosya" riski getirir.
+- **Çözüm sırası:** `HKCU\SOFTWARE\PdmVariableStudio\Language` (uygulamadaki dil kutusu yazar) >
+  `HKLM\...\Language` (kurulum, sihirbazın dilini yazar) > Windows arayüz dili (Türkçe
+  değilse İngilizce). Kural `UiLanguages.Resolve` içinde ve test ediliyor; kayıt defteri
+  okuma `App/LanguagePreference.cs`. Dil `settings.json`'da **değil**, çünkü eklenti de okuyor
+  ve eklentide `FlatJson` yok.
+- **Eklenti kuralın kopyasını taşır:** `AddIn/AddInText.cs` (Core referansı yasak). Kuralı
+  değiştirirseniz ikisini birlikte değiştirin.
+- **Dil süreç boyunca sabit.** `Loc.SetCurrent` yalnızca `Program.Main` başında çağrılır;
+  dil kutusu tercihi kaydedip yeniden başlatmayı önerir. Testler süreç dilini değiştirmez,
+  `using (Loc.Scope(UiLanguage.English))` kullanır — xUnit paralel koşuyor.
+- **Veri dile bağlı değil.** `CurrentCulture`'a dokunulmaz (sayı ayrıştırma bölge ayarıyla);
+  çalışma kitabı başlıkları dışa aktarımın dilinde yazılır ama okuyucu teknik sütunları
+  indisten, değişkenleri `_Metadata`'dan bulur ve salt okunur ekinin iki biçimini de tanır
+  (`WorkbookSchema.KnownReadOnlySuffixes`). Başlığa yeni bir dil eki eklerseniz oraya da
+  ekleyin.
+- **Çevrilmeyenler:** `studio.log` satırları, `TechnicalDetail`, istisna iletileri, ürün adı.
 
 ### Renk tek başına anlam taşımaz
 

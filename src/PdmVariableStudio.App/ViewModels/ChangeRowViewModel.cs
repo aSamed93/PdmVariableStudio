@@ -1,5 +1,6 @@
 using System.Globalization;
 using PdmVariableStudio.Core.Diff;
+using PdmVariableStudio.Core.Localization;
 using PdmVariableStudio.Core.Results;
 using PdmVariableStudio.Core.Services;
 
@@ -77,15 +78,15 @@ internal sealed class ChangeRowViewModel : ObservableObject
 
     public string StatusText => _cell.Status switch
     {
-        ChangeStatus.Unchanged => "Değişmemiş",
-        ChangeStatus.SafeChange => _cell.CanApply ? "Güvenli" : IssueText.Summary(_cell.Reason),
-        ChangeStatus.AlreadyApplied => "Zaten uygulanmış",
-        ChangeStatus.Conflict => "Çakışma",
-        ChangeStatus.ValidationError => "Hata",
-        ChangeStatus.NotWritable => "Yazılamaz",
-        ChangeStatus.Applied => "Uygulandı",
-        ChangeStatus.Failed => "Başarısız",
-        _ => "Atlandı",
+        ChangeStatus.Unchanged => Loc.T("Değişmemiş", "Unchanged"),
+        ChangeStatus.SafeChange => _cell.CanApply ? Loc.T("Güvenli", "Safe") : IssueText.Summary(_cell.Reason),
+        ChangeStatus.AlreadyApplied => Loc.T("Zaten uygulanmış", "Already applied"),
+        ChangeStatus.Conflict => Loc.T("Çakışma", "Conflict"),
+        ChangeStatus.ValidationError => Loc.T("Hata", "Error"),
+        ChangeStatus.NotWritable => Loc.T("Yazılamaz", "Not writable"),
+        ChangeStatus.Applied => Loc.T("Uygulandı", "Applied"),
+        ChangeStatus.Failed => Loc.T("Başarısız", "Failed"),
+        _ => Loc.T("Atlandı", "Skipped"),
     };
 
     /// <summary>Tema kaynak anahtarı. Renk XAML'de tanımlı; burada yalnızca sınıf adı üretilir.</summary>
@@ -118,11 +119,13 @@ internal sealed class ChangeRowViewModel : ObservableObject
 
             return _cell.Status switch
             {
-                ChangeStatus.SafeChange =>
+                ChangeStatus.SafeChange => Loc.T(
                     "Bu değer Excel'de değiştirilmiş ve PDM tarafı dışa aktarımdan beri " +
                     "değişmemiş. Uygulanması güvenli.",
-                ChangeStatus.Unchanged => "Bu hücreye dokunulmamış.",
-                ChangeStatus.Applied => "Değer PDM'ye başarıyla yazıldı.",
+                    "This value was changed in Excel and has not changed in PDM since the " +
+                    "export. It is safe to apply."),
+                ChangeStatus.Unchanged => Loc.T("Bu hücreye dokunulmamış.", "This cell was not edited."),
+                ChangeStatus.Applied => Loc.T("Değer PDM'ye başarıyla yazıldı.", "The value was written to PDM successfully."),
                 _ => string.Empty,
             };
         }
@@ -204,6 +207,7 @@ internal sealed class UndoRowViewModel : ObservableObject
     };
 
     public string Tooltip => _candidate.Reason == IssueCode.None
-        ? "Yazdığımız değer PDM'de hâlâ duruyor; geri alınması güvenli."
+        ? Loc.T("Yazdığımız değer PDM'de hâlâ duruyor; geri alınması güvenli.",
+                "The value we wrote is still in PDM; it is safe to undo.")
         : IssueText.Detail(_candidate.Reason);
 }

@@ -6,6 +6,7 @@ using EPDM.Interop.epdm;
 using PdmVariableStudio.App.Threading;
 using PdmVariableStudio.Core.Abstractions;
 using PdmVariableStudio.Core.Domain;
+using PdmVariableStudio.Core.Localization;
 using PdmVariableStudio.Core.Results;
 
 namespace PdmVariableStudio.App.Pdm;
@@ -50,12 +51,15 @@ internal sealed class PdmFileBrowser : IPdmFileBrowser
             var selection = scope.Track(_vault.BrowseForFile(
                 parentWindow.ToInt32(),
                 Flags,
-                "Tüm dosyalar (*.*)|*.*|SOLIDWORKS parça (*.sldprt)|*.sldprt|" +
-                "SOLIDWORKS montaj (*.sldasm)|*.sldasm|SOLIDWORKS teknik resim (*.slddrw)|*.slddrw||",
+                Loc.T(
+                    "Tüm dosyalar (*.*)|*.*|SOLIDWORKS parça (*.sldprt)|*.sldprt|" +
+                    "SOLIDWORKS montaj (*.sldasm)|*.sldasm|SOLIDWORKS teknik resim (*.slddrw)|*.slddrw||",
+                    "All files (*.*)|*.*|SOLIDWORKS part (*.sldprt)|*.sldprt|" +
+                    "SOLIDWORKS assembly (*.sldasm)|*.sldasm|SOLIDWORKS drawing (*.slddrw)|*.slddrw||"),
                 string.Empty,
                 string.Empty,
                 string.Empty,
-                "İşleme alınacak dosyaları seçin"));
+                Loc.T("İşleme alınacak dosyaları seçin", "Select the files to process")));
 
             if (selection is null)
             {

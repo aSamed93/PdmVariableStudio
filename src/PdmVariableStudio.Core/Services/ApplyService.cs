@@ -6,6 +6,7 @@ using PdmVariableStudio.Core.Diff;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Journal;
 using PdmVariableStudio.Core.Results;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Services;
 
@@ -27,7 +28,7 @@ public sealed class ApplyOptions
     /// </remarks>
     public bool CheckInAfterApply { get; set; } = true;
 
-    public string CheckInComment { get; set; } = "PDM Variable Studio ile toplu kart güncellemesi";
+    public string CheckInComment { get; set; } = Settings.StudioSettings.DefaultCheckInComment();
 
     /// <summary>Undo ise, geri alınan işlemin kimliği.</summary>
     public Guid UndoesOperationId { get; set; }
@@ -544,10 +545,10 @@ public sealed class ApplyProgress
 
     public string FileName { get; }
 
-    public static ApplyProgress Revalidating() => new("Değerler yeniden doğrulanıyor", 0, 0, string.Empty);
+    public static ApplyProgress Revalidating() => new(Loc.T("Değerler yeniden doğrulanıyor", "Revalidating values"), 0, 0, string.Empty);
 
     public static ApplyProgress Writing(int current, int total, string fileName) =>
-        new("Uygulanıyor", current, total, fileName);
+        new(Loc.T("Uygulanıyor", "Applying"), current, total, fileName);
 
     public string Describe() =>
         Total > 0 ? $"{Stage}: {Current} / {Total}  ({FileName})" : Stage;

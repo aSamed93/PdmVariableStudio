@@ -1,6 +1,7 @@
 using System;
 using PdmVariableStudio.Core.Abstractions;
 using PdmVariableStudio.Core.Domain;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.App.ViewModels;
 
@@ -79,31 +80,31 @@ internal sealed class FileRowViewModel : ObservableObject
 
             if (name.EndsWith(".sldprt", StringComparison.OrdinalIgnoreCase))
             {
-                return "Parça";
+                return Loc.T("Parça", "Part");
             }
 
             if (name.EndsWith(".sldasm", StringComparison.OrdinalIgnoreCase))
             {
-                return "Montaj";
+                return Loc.T("Montaj", "Assembly");
             }
 
             if (name.EndsWith(".slddrw", StringComparison.OrdinalIgnoreCase))
             {
-                return "Teknik resim";
+                return Loc.T("Teknik resim", "Drawing");
             }
 
             var dot = name.LastIndexOf('.');
             return dot > 0 && dot < name.Length - 1
                 ? name.Substring(dot + 1).ToUpperInvariant()
-                : "Dosya";
+                : Loc.T("Dosya", "File");
         }
     }
 
     public string SourceText => Source switch
     {
-        FileSourceKind.Folder => "Klasör",
-        FileSourceKind.File => "Dosya seçimi",
-        FileSourceKind.Assembly => "Montaj",
-        _ => "Arama",
+        FileSourceKind.Folder => Loc.T("Klasör", "Folder"),
+        FileSourceKind.File => Loc.T("Dosya seçimi", "File selection"),
+        FileSourceKind.Assembly => Loc.T("Montaj", "Assembly"),
+        _ => Loc.T("Arama", "Search"),
     };
 }

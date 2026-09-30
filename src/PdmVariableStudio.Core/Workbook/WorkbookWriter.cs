@@ -231,7 +231,7 @@ public sealed class WorkbookWriter
         {
             var variable = session.Variables[i];
             var caption = variable.IsReadOnly
-                ? variable.DisplayName + " (salt okunur)"
+                ? variable.DisplayName + WorkbookSchema.ReadOnlySuffix
                 : variable.DisplayName;
 
             row.AppendChild(TextCell(session.FirstVariableColumn + i, 1, caption, WorkbookStyles.Header));

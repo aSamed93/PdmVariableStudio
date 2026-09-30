@@ -8,6 +8,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Results;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Workbook;
 
@@ -260,12 +261,11 @@ public sealed class WorkbookReader
         for (var i = 0; i < variables.Count; i++)
         {
             var variable = variables[i];
-            var expectedHeader = ExpectedHeader(variable);
             var declared = i < declaredColumns.Count ? declaredColumns[i] : 0;
 
             if (declared > 0
                 && headerByColumn.TryGetValue(declared, out var headerAtDeclared)
-                && string.Equals(headerAtDeclared, expectedHeader, StringComparison.Ordinal))
+                && IsExpectedHeader(variable, headerAtDeclared))
             {
                 resolved.Add(declared);
                 continue;
@@ -274,7 +274,7 @@ public sealed class WorkbookReader
             var found = 0;
             foreach (var pair in headerByColumn)
             {
-                if (string.Equals(pair.Value, expectedHeader, StringComparison.Ordinal))
+                if (IsExpectedHeader(variable, pair.Value))
                 {
                     found = pair.Key;
                     break;
@@ -290,15 +290,38 @@ public sealed class WorkbookReader
             }
 
             issues.Warn(IssueCode.VariableColumnMissing, variable.DisplayName,
-                $"Beklenen sütun {declared}, başlık '{expectedHeader}'.");
+                $"Beklenen sütun {declared}, başlık '{variable.DisplayName}'.");
             resolved.Add(0);
         }
 
         return resolved;
     }
 
-    private static string ExpectedHeader(PdmVariableDefinition variable) =>
-        variable.IsReadOnly ? variable.DisplayName + " (salt okunur)" : variable.DisplayName;
+    /// <summary>Bulgunun kullanıcıya gösterilen yeri: "satır #42" / "row #42".</summary>
+    private static string RowContext(int exportRowId) =>
+        Loc.T($"satır #{exportRowId}", $"row #{exportRowId}");
+
+    /// <summary>
+    /// Başlık bu değişkenin mi. Salt okunur değişkende ek, kitabın dışa aktarıldığı dile
+    /// göre değişir; okuyan arayüzün dili başka olabileceği için bilinen eklerin hepsi denenir.
+    /// </summary>
+    private static bool IsExpectedHeader(PdmVariableDefinition variable, string header)
+    {
+        if (!variable.IsReadOnly)
+        {
+            return string.Equals(header, variable.DisplayName, StringComparison.Ordinal);
+        }
+
+        foreach (var suffix in WorkbookSchema.KnownReadOnlySuffixes)
+        {
+            if (string.Equals(header, variable.DisplayName + suffix, StringComparison.Ordinal))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     // ----------------------------------------------------------------- _Rows
 
@@ -395,7 +418,7 @@ public sealed class WorkbookReader
         {
             // Hangisinin doğru olduğu belirlenemez; ikisi de kullanılmaz.
             snapshots.Remove(duplicate);
-            issues.Error(IssueCode.DuplicateRow, $"satır #{duplicate}",
+            issues.Error(IssueCode.DuplicateRow, RowContext(duplicate),
                 "_Rows sayfasında aynı numara birden fazla kez geçiyor.");
         }
 
@@ -479,13 +502,13 @@ public sealed class WorkbookReader
 
             if (!snapshot.FingerprintValid)
             {
-                imported.Issues.Add(ValidationIssue.Error(IssueCode.RowTampered, $"satır #{exportRowId}",
+                imported.Issues.Add(ValidationIssue.Error(IssueCode.RowTampered, RowContext(exportRowId),
                     "RowFingerprint tutmuyor."));
             }
 
             if (identity.FileId <= 0)
             {
-                imported.Issues.Add(ValidationIssue.Error(IssueCode.RowTampered, $"satır #{exportRowId}",
+                imported.Issues.Add(ValidationIssue.Error(IssueCode.RowTampered, RowContext(exportRowId),
                     "FileId geçersiz."));
             }
 
@@ -499,17 +522,17 @@ public sealed class WorkbookReader
             {
                 if (duplicated.Contains(row.ExportRowId))
                 {
-                    row.Issues.Add(ValidationIssue.Error(IssueCode.DuplicateRow, $"satır #{row.ExportRowId}",
+                    row.Issues.Add(ValidationIssue.Error(IssueCode.DuplicateRow, RowContext(row.ExportRowId),
                         "Variables sayfasında aynı numara birden fazla kez geçiyor."));
                 }
             }
 
-            issues.Error(IssueCode.DuplicateRow, $"{duplicated.Count} satır");
+            issues.Error(IssueCode.DuplicateRow, Loc.N(duplicated.Count, "satır", "row", "rows"));
         }
 
         if (unknownCount > 0)
         {
-            issues.Warn(IssueCode.UnknownRow, $"{unknownCount} satır",
+            issues.Warn(IssueCode.UnknownRow, Loc.N(unknownCount, "satır", "row", "rows"),
                 "Numarası _Rows sayfasında bulunamayan satırlar atlandı.");
         }
 

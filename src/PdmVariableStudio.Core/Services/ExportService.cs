@@ -5,6 +5,7 @@ using PdmVariableStudio.Core.Abstractions;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Results;
 using PdmVariableStudio.Core.Workbook;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Services;
 
@@ -243,9 +244,9 @@ public sealed class ExportProgress
 
     public int Total { get; }
 
-    public static ExportProgress Reading(int current, int total) => new("Değerler okunuyor", current, total);
+    public static ExportProgress Reading(int current, int total) => new(Loc.T("Değerler okunuyor", "Reading values"), current, total);
 
-    public static ExportProgress Writing() => new("Çalışma kitabı yazılıyor", 0, 0);
+    public static ExportProgress Writing() => new(Loc.T("Çalışma kitabı yazılıyor", "Writing workbook"), 0, 0);
 
     public string Describe() =>
         Total > 0

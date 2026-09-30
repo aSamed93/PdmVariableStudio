@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Domain;
 
@@ -52,12 +53,12 @@ public sealed class CheckoutState
 
     public override string ToString() => Status switch
     {
-        CheckoutStatus.NotCheckedOut => "Çekili değil",
-        CheckoutStatus.CheckedOutByMe => "Sizin tarafınızdan çekili",
+        CheckoutStatus.NotCheckedOut => Loc.T("Çekili değil", "Not checked out"),
+        CheckoutStatus.CheckedOutByMe => Loc.T("Sizin tarafınızdan çekili", "Checked out by you"),
         CheckoutStatus.CheckedOutByOther => Computer.Length > 0
-            ? $"{User} tarafından çekili ({Computer})"
-            : $"{User} tarafından çekili",
-        _ => "Durum bilinmiyor",
+            ? Loc.T($"{User} tarafından çekili ({Computer})", $"Checked out by {User} ({Computer})")
+            : Loc.T($"{User} tarafından çekili", $"Checked out by {User}"),
+        _ => Loc.T("Durum bilinmiyor", "Status unknown"),
     };
 }
 

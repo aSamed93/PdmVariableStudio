@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Results;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Journal;
 
@@ -163,12 +164,12 @@ public sealed class ApplyOperation
 
     public string OutcomeText => Outcome switch
     {
-        OperationOutcomeKind.Success => "Başarılı",
-        OperationOutcomeKind.Partial => "Kısmen başarılı",
-        OperationOutcomeKind.Failed => "Başarısız",
-        OperationOutcomeKind.Cancelled => "Durduruldu",
-        _ => "Yarım kaldı",
+        OperationOutcomeKind.Success => Loc.T("Başarılı", "Succeeded"),
+        OperationOutcomeKind.Partial => Loc.T("Kısmen başarılı", "Partially succeeded"),
+        OperationOutcomeKind.Failed => Loc.T("Başarısız", "Failed"),
+        OperationOutcomeKind.Cancelled => Loc.T("Durduruldu", "Stopped"),
+        _ => Loc.T("Yarım kaldı", "Incomplete"),
     };
 
-    public string TypeText => Type == OperationType.Undo ? "Geri alma" : "Uygulama";
+    public string TypeText => Type == OperationType.Undo ? Loc.T("Geri alma", "Undo") : Loc.T("Uygulama", "Apply");
 }

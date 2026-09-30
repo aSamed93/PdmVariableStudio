@@ -7,6 +7,7 @@ using PdmVariableStudio.Core.Diff;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Results;
 using PdmVariableStudio.Core.Workbook;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Services;
 
@@ -52,7 +53,7 @@ public sealed class ImportService
         CancellationToken cancellationToken = default)
     {
         // 1-5. adımlar: şema, damga, sütun ve satır eşlemesi.
-        progress?.Report("Çalışma kitabı okunuyor");
+        progress?.Report(Loc.T("Çalışma kitabı okunuyor", "Reading workbook"));
         var workbook = _workbookReader.Read(workbookPath);
 
         if (workbook.IsRejected)
@@ -81,7 +82,7 @@ public sealed class ImportService
 
         // 6. adım: güncel PDM değerleri. Yalnızca değişmiş GÖRÜNEN satırların dosyaları için
         // PDM'ye gidilir; değişmemiş bir satır için tur atmanın anlamı yok.
-        progress?.Report("PDM güncel değerleri okunuyor");
+        progress?.Report(Loc.T("PDM güncel değerleri okunuyor", "Reading current PDM values"));
         var touchedFiles = CollectTouchedFiles(workbook);
 
         var snapshots = new Dictionary<PdmFileIdentity, PdmFileSnapshot>();
@@ -121,7 +122,7 @@ public sealed class ImportService
         cancellationToken.ThrowIfCancellationRequested();
 
         // 7-11. adımlar: karşılaştırma, yetki/kilit, uygulanabilirlik.
-        progress?.Report("Değişiklikler karşılaştırılıyor");
+        progress?.Report(Loc.T("Değişiklikler karşılaştırılıyor", "Comparing changes"));
         var issues = new List<ValidationIssue>(workbook.Issues);
         foreach (var file in missing)
         {

@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using PdmVariableStudio.Core.Domain;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.App.Views;
 
@@ -55,14 +56,14 @@ internal static class AssemblyDialog
 
         var subassemblies = new CheckBox
         {
-            Content = "Alt montajların içindeki parçaları da ekle",
+            Content = Loc.T("Alt montajların içindeki parçaları da ekle", "Also add the contents of subassemblies"),
             IsChecked = true,
             Margin = new Thickness(0, 10, 0, 0),
         };
 
         var includeRoot = new CheckBox
         {
-            Content = "Montajın kendisini de ekle",
+            Content = Loc.T("Montajın kendisini de ekle", "Also add the assembly itself"),
             IsChecked = true,
             Margin = new Thickness(0, 6, 0, 0),
         };
@@ -77,17 +78,19 @@ internal static class AssemblyDialog
             Margin = new Thickness(0, 0, 0, 12),
         });
 
-        layout.Children.Add(Caption("Konfigürasyon"));
+        layout.Children.Add(Caption(Loc.T("Konfigürasyon", "Configuration")));
         layout.Children.Add(configuration);
-        layout.Children.Add(Hint(
+        layout.Children.Add(Hint(Loc.T(
             "Montajın bu konfigürasyonunda kullanılan bileşenler eklenir. Her parça için yalnızca " +
-            "montajın kullandığı konfigürasyon ve dosya düzeyi (@) satır olur."));
+            "montajın kullandığı konfigürasyon ve dosya düzeyi (@) satır olur.",
+            "The components used in this configuration of the assembly are added. Each part gets " +
+            "rows only for the configuration the assembly uses and for the file level (@).")));
         layout.Children.Add(subassemblies);
         layout.Children.Add(includeRoot);
 
         var ok = new Button
         {
-            Content = "Bileşenleri Ekle",
+            Content = Loc.T("Bileşenleri Ekle", "Add Components"),
             IsDefault = true,
             MinWidth = 130,
             Padding = new Thickness(14, 6, 14, 6),
@@ -96,7 +99,7 @@ internal static class AssemblyDialog
 
         var cancel = new Button
         {
-            Content = "İptal",
+            Content = Loc.T("İptal", "Cancel"),
             IsCancel = true,
             MinWidth = 90,
             Padding = new Thickness(14, 6, 14, 6),
@@ -115,7 +118,7 @@ internal static class AssemblyDialog
 
         var window = new Window
         {
-            Title = "Montajdan ekle",
+            Title = Loc.T("Montajdan ekle", "Add from Assembly"),
             Content = layout,
             Width = 460,
             SizeToContent = SizeToContent.Height,

@@ -153,6 +153,25 @@ PDM'deki güncel değerle karşılaştırın:
 
 Geri alma da bir işlemdir ve geçmişe girer.
 
+### Arayüz dili
+
+Uygulama ve eklenti **Türkçe** ve **İngilizce** çalışır; kurulum ve paket tektir. Dil şu
+sırayla seçilir:
+
+1. Uygulamanın sağ üstündeki dil kutusunda sizin seçtiğiniz dil
+   (`HKCU\SOFTWARE\PdmVariableStudio\Language`)
+2. Kurulumda seçilen dil (`HKLM\SOFTWARE\PdmVariableStudio\Language`; kurulum sihirbazının
+   dili buraya yazılır, BT dağıtımıyla da verilebilir)
+3. Windows'un dili — Türkçe Windows'ta Türkçe, diğerlerinde İngilizce
+
+Dil kutusundan değiştirdiğinizde uygulama yeniden başlatmayı önerir (dosya listesi ve
+önizleme sıfırlanır; işlem geçmişi etkilenmez). PDM Explorer menüsündeki ipucu metni,
+Explorer bir sonraki açılışında yeni dile geçer.
+
+Dil yalnızca metinleri değiştirir, **veriyi değil**: sayılar ve tarihler yine Windows'un
+bölge ayarıyla okunur. İngilizce arayüzde dışa aktarılan bir çalışma kitabı Türkçe arayüzde
+(ve tersi) sorunsuz içe aktarılır; yalnızca Excel'deki başlıklar dışa aktarımın dilindedir.
+
 ---
 
 ## Dosyalar nerede

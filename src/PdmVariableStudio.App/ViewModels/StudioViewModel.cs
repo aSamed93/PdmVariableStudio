@@ -17,6 +17,7 @@ using PdmVariableStudio.Core.Diagnostics;
 using PdmVariableStudio.Core.Diff;
 using PdmVariableStudio.Core.Domain;
 using PdmVariableStudio.Core.Journal;
+using PdmVariableStudio.Core.Localization;
 using PdmVariableStudio.Core.Results;
 using PdmVariableStudio.Core.Services;
 using PdmVariableStudio.Core.Settings;
@@ -48,11 +49,11 @@ internal sealed class VariableChoice : ObservableObject
 
     private string TypeText => Definition.DataType switch
     {
-        PdmVariableType.Int => "tam sayı",
-        PdmVariableType.Float => "ondalık",
-        PdmVariableType.Bool => "evet/hayır",
-        PdmVariableType.Date => "tarih",
-        _ => "metin",
+        PdmVariableType.Int => Loc.T("tam sayı", "integer"),
+        PdmVariableType.Float => Loc.T("ondalık", "decimal"),
+        PdmVariableType.Bool => Loc.T("evet/hayır", "yes/no"),
+        PdmVariableType.Date => Loc.T("tarih", "date"),
+        _ => Loc.T("metin", "text"),
     };
 }
 
@@ -73,12 +74,13 @@ internal sealed class OperationRowViewModel
     public string TypeText => Operation.TypeText;
 
     public string Summary =>
-        $"{Operation.FileCount} dosya · {Operation.AppliedCount} değer";
+        Loc.N(Operation.FileCount, "dosya", "file", "files") + " · " +
+        Loc.N(Operation.AppliedCount, "değer", "value", "values");
 
     public string Workbook => System.IO.Path.GetFileName(Operation.SourceWorkbookPath);
 
     public string OutcomeText => Operation.IsUndone
-        ? Operation.OutcomeText + " (geri alındı)"
+        ? Operation.OutcomeText + Loc.T(" (geri alındı)", " (undone)")
         : Operation.OutcomeText;
 
     public bool CanUndo => Operation.IsUndoCandidate;
@@ -142,7 +144,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     private string _lastExportPath = string.Empty;
     private bool _checkoutConsent;
     private bool _checkInAfterApply = true;
-    private string _checkInComment = "PDM Variable Studio ile toplu kart güncellemesi";
+    private string _checkInComment = StudioSettings.DefaultCheckInComment();
 
     private bool _showChangesOnly = true;
     private bool _showConflictsOnly;
@@ -390,8 +392,15 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
     public string CheckoutWarning => PendingCheckoutCount == 0
         ? string.Empty
-        : $"Bu işlem {PendingCheckoutCount} dosyayı CHECK-OUT edecek" +
-          (CheckInAfterApply ? " ve işlem sonunda geri iade edecek." : " ve çekili bırakacak.");
+        : CheckInAfterApply
+            ? Loc.T(
+                $"Bu işlem {PendingCheckoutCount} dosyayı CHECK-OUT edecek ve işlem sonunda geri iade edecek.",
+                $"This operation will CHECK OUT {Loc.N(PendingCheckoutCount, "dosya", "file", "files")} " +
+                $"and check {(PendingCheckoutCount == 1 ? "it" : "them")} back in when it finishes.")
+            : Loc.T(
+                $"Bu işlem {PendingCheckoutCount} dosyayı CHECK-OUT edecek ve çekili bırakacak.",
+                $"This operation will CHECK OUT {Loc.N(PendingCheckoutCount, "dosya", "file", "files")} " +
+                $"and leave {(PendingCheckoutCount == 1 ? "it" : "them")} checked out.");
 
     public bool HasChangeSet => _changeSet is not null;
 
@@ -412,7 +421,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 }
             }
 
-            return "Çalışma kitabı reddedildi.";
+            return Loc.T("Çalışma kitabı reddedildi.", "The workbook was rejected.");
         }
     }
 
@@ -541,13 +550,15 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     public async Task InitializeAsync()
     {
         IsBusy = true;
-        BusyMessage = "Vault'a bağlanılıyor";
+        BusyMessage = Loc.T("Vault'a bağlanılıyor", "Connecting to vault");
 
         try
         {
             if (!await _queue.WaitUntilReadyAsync())
             {
-                StatusMessage = $"'{_vaultName}' vault'una bağlanılamadı. Ayrıntı: {_log.FilePath}";
+                StatusMessage = Loc.T(
+                    $"'{_vaultName}' vault'una bağlanılamadı. Ayrıntı: {_log.FilePath}",
+                    $"Could not connect to vault '{_vaultName}'. Details: {_log.FilePath}");
                 return;
             }
 
@@ -616,14 +627,17 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 // Tek başına açıldı: liste boş. Açılışta klasör seçme penceresi göstermek
                 // yerine kullanıcıyı kaynak düğmelerine yönlendiriyoruz — orada üç seçenek
                 // var ve hangisini isteyeceğini uygulama açılmadan bilemez.
-                StatusMessage = $"{Variables.Count} değişken bulundu. " +
-                                "Başlamak için Klasör Ekle, Dosya Ekle, Ara ve Ekle ya da Montajdan Ekle kullanın.";
+                StatusMessage = Loc.T(
+                    $"{Variables.Count} değişken bulundu. " +
+                    "Başlamak için Klasör Ekle, Dosya Ekle, Ara ve Ekle ya da Montajdan Ekle kullanın.",
+                    $"{Loc.N(Variables.Count, "değişken", "variable", "variables")} found. " +
+                    "To get started, use Add Folder, Add Files, Search and Add or Add from Assembly.");
             }
         }
         catch (Exception exception)
         {
             _log.Error("Başlatma başarısız.", exception);
-            StatusMessage = "Başlatma başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Başlatma başarısız. Ayrıntı: ", "Startup failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -647,13 +661,15 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         }
 
         IsBusy = true;
-        BusyMessage = "Klasör taranıyor";
+        BusyMessage = Loc.T("Klasör taranıyor", "Scanning folder");
 
         try
         {
             var folderId = _folderId;
             var includeSubfolders = IncludeSubfolders;
-            var progress = new Progress<int>(count => BusyMessage = $"Klasör taranıyor: {count} dosya");
+            var progress = new Progress<int>(count => BusyMessage = Loc.T(
+                $"Klasör taranıyor: {count} dosya",
+                $"Scanning folder: {Loc.N(count, "dosya", "file", "files")}"));
 
             var scan = await _queue.RunAsync(
                 t => _scanner.ScanFolder(folderId, includeSubfolders, Array.Empty<string>(), progress, t));
@@ -671,12 +687,13 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                       $"{scan.Value.Count} dosya bulundu, {added} eklendi, " +
                       $"alt klasörler {(includeSubfolders ? "dahil" : "hariç")}.");
 
-            StatusMessage = $"{FolderPath}: {added} dosya, {Variables.Count} değişken.";
+            StatusMessage = $"{FolderPath}: {Loc.N(added, "dosya", "file", "files")}, " +
+                            $"{Loc.N(Variables.Count, "değişken", "variable", "variables")}.";
         }
         catch (Exception exception)
         {
             _log.Error("Başlangıç klasörü taranamadı.", exception);
-            StatusMessage = "Klasör taranamadı. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Klasör taranamadı. Ayrıntı: ", "Could not scan the folder. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -700,7 +717,8 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
             var folder = scope.Track(vault17.BrowseForFolder(
                 parentWindow.ToInt32(),
-                "İşleme alınacak dosyaların bulunduğu klasörü seçin"));
+                Loc.T("İşleme alınacak dosyaların bulunduğu klasörü seçin",
+                    "Select the folder containing the files to process")));
 
             return folder?.ID ?? 0;
         }
@@ -810,9 +828,11 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            BusyMessage = "Klasör taranıyor";
+            BusyMessage = Loc.T("Klasör taranıyor", "Scanning folder");
 
-            var progress = new Progress<int>(count => BusyMessage = $"Klasör taranıyor: {count} dosya");
+            var progress = new Progress<int>(count => BusyMessage = Loc.T(
+                $"Klasör taranıyor: {count} dosya",
+                $"Scanning folder: {Loc.N(count, "dosya", "file", "files")}"));
 
             var scan = await _queue.RunAsync(
                 t => _scanner.ScanFolder(folderId, includeSubfolders, Array.Empty<string>(), progress, t),
@@ -833,17 +853,21 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                       $"{added} eklendi, alt klasörler {(includeSubfolders ? "dahil" : "hariç")}.");
 
             StatusMessage = added == scan.Value.Count
-                ? $"{path}: {added} dosya eklendi."
-                : $"{path}: {added} dosya eklendi ({scan.Value.Count - added} zaten listedeydi).";
+                ? Loc.T(
+                    $"{path}: {added} dosya eklendi.",
+                    $"{path}: {Loc.N(added, "dosya", "file", "files")} added.")
+                : Loc.T(
+                    $"{path}: {added} dosya eklendi ({scan.Value.Count - added} zaten listedeydi).",
+                    $"{path}: {Loc.N(added, "dosya", "file", "files")} added ({scan.Value.Count - added} already in the list).");
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Tarama durduruldu.";
+            StatusMessage = Loc.T("Tarama durduruldu.", "Scan stopped.");
         }
         catch (Exception exception)
         {
             _log.Error("Klasör eklenemedi.", exception);
-            StatusMessage = "Klasör eklenemedi. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Klasör eklenemedi. Ayrıntı: ", "Could not add the folder. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -880,12 +904,14 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             }
 
             var added = AddFiles(outcome.Value, FileSourceKind.File);
-            StatusMessage = $"{added} dosya eklendi.";
+            StatusMessage = Loc.T(
+                $"{added} dosya eklendi.",
+                $"{Loc.N(added, "dosya", "file", "files")} added.");
         }
         catch (Exception exception)
         {
             _log.Error("Dosya eklenemedi.", exception);
-            StatusMessage = "Dosya eklenemedi. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Dosya eklenemedi. Ayrıntı: ", "Could not add files. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -932,8 +958,11 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
             {
                 if (picked.Value.Count > 0)
                 {
-                    StatusMessage = "Seçilen dosyalar arasında montaj (.sldasm) yok. " +
-                                    "Parça ya da belge eklemek için Dosya Ekle'yi kullanın.";
+                    StatusMessage = Loc.T(
+                        "Seçilen dosyalar arasında montaj (.sldasm) yok. " +
+                        "Parça ya da belge eklemek için Dosya Ekle'yi kullanın.",
+                        "None of the selected files is an assembly (.sldasm). " +
+                        "To add parts or documents, use Add Files.");
                 }
 
                 return;
@@ -955,7 +984,9 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
                 if (configurations.Value.Count == 0)
                 {
-                    StatusMessage = $"{assembly.FileName}: konfigürasyon okunamadı; montaj atlandı.";
+                    StatusMessage = Loc.T(
+                        $"{assembly.FileName}: konfigürasyon okunamadı; montaj atlandı.",
+                        $"{assembly.FileName}: could not read configurations; assembly skipped.");
                     continue;
                 }
 
@@ -969,7 +1000,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                     continue;
                 }
 
-                BusyMessage = $"Montaj okunuyor: {assembly.FileName}";
+                BusyMessage = Loc.T($"Montaj okunuyor: {assembly.FileName}", $"Reading assembly: {assembly.FileName}");
 
                 var structure = await _queue.RunAsync(
                     t => _assemblyReader.ReadStructure(
@@ -989,30 +1020,32 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 var added = AddAssemblyFiles(expanded, detail);
                 totalAdded += added;
 
-                RememberFolderScope(assembly.FolderId, "Montaj: " + detail, includeSubfolders: false);
+                RememberFolderScope(assembly.FolderId, Loc.T("Montaj: ", "Assembly: ") + detail, includeSubfolders: false);
 
                 _log.Info($"Montajdan eklendi: {detail}, {expanded.Count} dosya, {added} yeni, " +
                           $"alt montaj içerikleri {(choice.IncludeSubassemblyContents ? "dahil" : "hariç")}, " +
                           $"kök montaj {(choice.IncludeRoot ? "dahil" : "hariç")}.");
 
                 summaries.Add(added == expanded.Count
-                    ? $"{assembly.FileName}: {added} dosya"
-                    : $"{assembly.FileName}: {added} dosya ({expanded.Count - added} zaten listedeydi)");
+                    ? $"{assembly.FileName}: {Loc.N(added, "dosya", "file", "files")}"
+                    : Loc.T(
+                        $"{assembly.FileName}: {added} dosya ({expanded.Count - added} zaten listedeydi)",
+                        $"{assembly.FileName}: {Loc.N(added, "dosya", "file", "files")} ({expanded.Count - added} already in the list)"));
             }
 
             if (summaries.Count > 0)
             {
-                StatusMessage = "Montajdan eklendi — " + string.Join("; ", summaries) + ".";
+                StatusMessage = Loc.T("Montajdan eklendi — ", "Added from assembly — ") + string.Join("; ", summaries) + ".";
             }
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Montaj okuma durduruldu.";
+            StatusMessage = Loc.T("Montaj okuma durduruldu.", "Assembly reading stopped.");
         }
         catch (Exception exception)
         {
             _log.Error("Montajdan eklenemedi.", exception);
-            StatusMessage = "Montajdan eklenemedi. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Montajdan eklenemedi. Ayrıntı: ", "Could not add from assembly. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1038,12 +1071,14 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
         _cancellation = new CancellationTokenSource();
         IsBusy = true;
-        BusyMessage = "Aranıyor";
+        BusyMessage = Loc.T("Aranıyor", "Searching");
 
         try
         {
             var token = _cancellation.Token;
-            var progress = new Progress<int>(count => BusyMessage = $"Aranıyor: {count} sonuç");
+            var progress = new Progress<int>(count => BusyMessage = Loc.T(
+                $"Aranıyor: {count} sonuç",
+                $"Searching: {Loc.N(count, "sonuç", "result", "results")}"));
 
             var outcome = await _queue.RunAsync(t => _browser.Search(criteria, progress, t), token);
 
@@ -1055,24 +1090,28 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
             if (outcome.Value.Count == 0)
             {
-                StatusMessage = "Arama sonuç vermedi.";
+                StatusMessage = Loc.T("Arama sonuç vermedi.", "The search returned no results.");
                 return;
             }
 
             var added = AddFiles(outcome.Value, FileSourceKind.Search);
 
             StatusMessage = added == outcome.Value.Count
-                ? $"Arama: {added} dosya eklendi."
-                : $"Arama: {added} dosya eklendi ({outcome.Value.Count - added} zaten listedeydi).";
+                ? Loc.T(
+                    $"Arama: {added} dosya eklendi.",
+                    $"Search: {Loc.N(added, "dosya", "file", "files")} added.")
+                : Loc.T(
+                    $"Arama: {added} dosya eklendi ({outcome.Value.Count - added} zaten listedeydi).",
+                    $"Search: {Loc.N(added, "dosya", "file", "files")} added ({outcome.Value.Count - added} already in the list).");
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Arama durduruldu.";
+            StatusMessage = Loc.T("Arama durduruldu.", "Search stopped.");
         }
         catch (Exception exception)
         {
             _log.Error("Arama başarısız.", exception);
-            StatusMessage = "Arama başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Arama başarısız. Ayrıntı: ", "Search failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1090,7 +1129,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
         if (removed == 0)
         {
-            StatusMessage = "Silinecek dosya işaretlenmemiş.";
+            StatusMessage = Loc.T("Silinecek dosya işaretlenmemiş.", "No files are marked for removal.");
             return;
         }
 
@@ -1101,7 +1140,9 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         }
 
         RaiseFileSummary();
-        StatusMessage = $"{removed} dosya listeden çıkarıldı.";
+        StatusMessage = Loc.T(
+            $"{removed} dosya listeden çıkarıldı.",
+            $"{Loc.N(removed, "dosya", "file", "files")} removed from the list.");
     }
 
     private void ClearFiles()
@@ -1110,7 +1151,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         _scopeFolderId = 0;
         _scopeDescription = string.Empty;
         RaiseFileSummary();
-        StatusMessage = "Dosya listesi temizlendi.";
+        StatusMessage = Loc.T("Dosya listesi temizlendi.", "File list cleared.");
     }
 
     private IReadOnlyList<string> VariableNames()
@@ -1134,7 +1175,9 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     /// </remarks>
     private void RememberFolderScope(int folderId, string path, bool includeSubfolders)
     {
-        var description = includeSubfolders ? path + " (alt klasörler dahil)" : path;
+        var description = includeSubfolders
+            ? path + Loc.T(" (alt klasörler dahil)", " (subfolders included)")
+            : path;
 
         if (_scopeDescription.Length == 0)
         {
@@ -1147,7 +1190,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         if (_scopeDescription != description)
         {
             _scopeFolderId = 0;
-            _scopeDescription = "(çeşitli kaynaklar)";
+            _scopeDescription = Loc.T("(çeşitli kaynaklar)", "(multiple sources)");
         }
     }
 
@@ -1162,8 +1205,8 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
     public bool HasFiles => Files.Count > 0;
 
     public string FileCountText => Files.Count == 0
-        ? "Henüz dosya eklenmedi"
-        : $"{Files.Count} dosya";
+        ? Loc.T("Henüz dosya eklenmedi", "No files added yet")
+        : Loc.N(Files.Count, "dosya", "file", "files");
 
     // ---------------------------------------------------------- dışa aktarım
 
@@ -1181,7 +1224,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
         if (!System.IO.File.Exists(path))
         {
-            StatusMessage = $"Dosya artık burada değil: {path}";
+            StatusMessage = Loc.T($"Dosya artık burada değil: {path}", $"The file is no longer here: {path}");
             LastExportPath = string.Empty;
             return;
         }
@@ -1200,7 +1243,9 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         catch (System.ComponentModel.Win32Exception exception)
         {
             _log.Error("Dışa aktarılan dosya açılamadı: " + path, exception);
-            StatusMessage = "Dosya açılamadı; .xlsx için kayıtlı bir uygulama bulunamadı. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T(
+                "Dosya açılamadı; .xlsx için kayıtlı bir uygulama bulunamadı. Ayrıntı: ",
+                "Could not open the file; no application is registered for .xlsx. Details: ") + _log.FilePath;
         }
     }
 
@@ -1213,20 +1258,20 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
         if (Files.Count == 0)
         {
-            StatusMessage = "Önce işleme alınacak dosyaları ekleyin.";
+            StatusMessage = Loc.T("Önce işleme alınacak dosyaları ekleyin.", "Add the files to process first.");
             return;
         }
 
         var selected = Variables.Where(v => v.IsSelected).Select(v => v.Definition).ToList();
         if (selected.Count == 0)
         {
-            StatusMessage = "En az bir değişken seçmelisiniz.";
+            StatusMessage = Loc.T("En az bir değişken seçmelisiniz.", "Select at least one variable.");
             return;
         }
 
         var dialog = new SaveFileDialog
         {
-            Filter = "Excel çalışma kitabı (*.xlsx)|*.xlsx",
+            Filter = Loc.T("Excel çalışma kitabı (*.xlsx)|*.xlsx", "Excel workbook (*.xlsx)|*.xlsx"),
             FileName = BuildDefaultFileName(),
             AddExtension = true,
             OverwritePrompt = true,
@@ -1257,7 +1302,9 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
             var request = new ExportRequest(files, selected)
             {
-                ScopeDescription = _scopeDescription.Length > 0 ? _scopeDescription : "(seçili dosyalar)",
+                ScopeDescription = _scopeDescription.Length > 0
+                    ? _scopeDescription
+                    : Loc.T("(seçili dosyalar)", "(selected files)"),
                 PrimaryFolderId = _scopeFolderId,
                 IncludeSubfolders = _scopeIncludeSubfolders,
                 Scopes = scopes,
@@ -1275,23 +1322,25 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
                 return;
             }
 
-            BusyMessage = "Çalışma kitabı yazılıyor";
+            BusyMessage = Loc.T("Çalışma kitabı yazılıyor", "Writing workbook");
 
             // Excel yazımı saf .NET; COM yok, thread havuzunda çalışabilir.
             await Task.Run(() => new WorkbookWriter().Write(outcome.Value, dialog.FileName, token), token);
 
             LastExportPath = dialog.FileName;
-            StatusMessage = $"{outcome.Value.Rows.Count} satır dışa aktarıldı: {dialog.FileName}";
+            StatusMessage = Loc.T(
+                $"{outcome.Value.Rows.Count} satır dışa aktarıldı: {dialog.FileName}",
+                $"{Loc.N(outcome.Value.Rows.Count, "satır", "row", "rows")} exported: {dialog.FileName}");
             _log.Info($"Dışa aktarım tamamlandı: {dialog.FileName}");
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "Dışa aktarım durduruldu.";
+            StatusMessage = Loc.T("Dışa aktarım durduruldu.", "Export stopped.");
         }
         catch (Exception exception)
         {
             _log.Error("Dışa aktarım başarısız.", exception);
-            StatusMessage = "Dışa aktarım başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Dışa aktarım başarısız. Ayrıntı: ", "Export failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1348,7 +1397,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
         var dialog = new OpenFileDialog
         {
-            Filter = "Excel çalışma kitabı (*.xlsx)|*.xlsx",
+            Filter = Loc.T("Excel çalışma kitabı (*.xlsx)|*.xlsx", "Excel workbook (*.xlsx)|*.xlsx"),
             CheckFileExists = true,
             // Dışa aktarılan dosya büyük olasılıkla aynı klasörden geri gelecek.
             InitialDirectory = RememberedExportDirectory(),
@@ -1381,12 +1430,12 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         }
         catch (OperationCanceledException)
         {
-            StatusMessage = "İçe aktarım durduruldu.";
+            StatusMessage = Loc.T("İçe aktarım durduruldu.", "Import stopped.");
         }
         catch (Exception exception)
         {
             _log.Error("İçe aktarım başarısız.", exception);
-            StatusMessage = "İçe aktarım başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("İçe aktarım başarısız. Ayrıntı: ", "Import failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1413,8 +1462,13 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
         StatusMessage = changeSet.IsRejected
             ? RejectionMessage
-            : $"{changeSet.SafeChangeCount} güvenli değişiklik, {changeSet.ConflictCount} çakışma, " +
-              $"{changeSet.ErrorCount} hata, {changeSet.UnchangedCount} değişmemiş.";
+            : Loc.T(
+                $"{changeSet.SafeChangeCount} güvenli değişiklik, {changeSet.ConflictCount} çakışma, " +
+                $"{changeSet.ErrorCount} hata, {changeSet.UnchangedCount} değişmemiş.",
+                $"{Loc.N(changeSet.SafeChangeCount, "güvenli değişiklik", "safe change", "safe changes")}, " +
+                $"{Loc.N(changeSet.ConflictCount, "çakışma", "conflict", "conflicts")}, " +
+                $"{Loc.N(changeSet.ErrorCount, "hata", "error", "errors")}, " +
+                $"{changeSet.UnchangedCount} unchanged.");
     }
 
     // --------------------------------------------------------------- uygulama
@@ -1457,8 +1511,11 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
             StatusMessage = outcome.IsFailure
                 ? outcome.Summary + " " + outcome.Detail
-                : $"{outcome.Value.AppliedCount} değer uygulandı, " +
-                  $"{outcome.Value.FailedCount} başarısız, {outcome.Value.SkippedCount} atlandı.";
+                : Loc.T(
+                    $"{outcome.Value.AppliedCount} değer uygulandı, " +
+                    $"{outcome.Value.FailedCount} başarısız, {outcome.Value.SkippedCount} atlandı.",
+                    $"{Loc.N(outcome.Value.AppliedCount, "değer", "value", "values")} applied, " +
+                    $"{outcome.Value.FailedCount} failed, {outcome.Value.SkippedCount} skipped.");
 
             if (outcome.IsSuccess && outcome.Value.FailedCount > 0)
             {
@@ -1471,7 +1528,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         catch (Exception exception)
         {
             _log.Error("Uygulama başarısız.", exception);
-            StatusMessage = "Uygulama başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Uygulama başarısız. Ayrıntı: ", "Apply failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1549,14 +1606,18 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
             RaiseCommandStates();
 
-            StatusMessage = $"Geri alma önizlemesi: {outcome.Value.SafeCount} güvenli, " +
-                            $"{outcome.Value.ConflictCount} çakışma, " +
-                            $"{outcome.Value.UnavailableCount} kullanılamaz.";
+            StatusMessage = Loc.T(
+                $"Geri alma önizlemesi: {outcome.Value.SafeCount} güvenli, " +
+                $"{outcome.Value.ConflictCount} çakışma, " +
+                $"{outcome.Value.UnavailableCount} kullanılamaz.",
+                $"Undo preview: {outcome.Value.SafeCount} safe, " +
+                $"{Loc.N(outcome.Value.ConflictCount, "çakışma", "conflict", "conflicts")}, " +
+                $"{outcome.Value.UnavailableCount} unavailable.");
         }
         catch (Exception exception)
         {
             _log.Error("Geri alma önizlemesi başarısız.", exception);
-            StatusMessage = "Geri alma önizlemesi başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Geri alma önizlemesi başarısız. Ayrıntı: ", "Undo preview failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1597,8 +1658,11 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
 
             StatusMessage = outcome.IsFailure
                 ? outcome.Summary + " " + outcome.Detail
-                : $"{outcome.Value.AppliedCount} değer geri alındı, " +
-                  $"{outcome.Value.FailedCount} başarısız.";
+                : Loc.T(
+                    $"{outcome.Value.AppliedCount} değer geri alındı, " +
+                    $"{outcome.Value.FailedCount} başarısız.",
+                    $"{Loc.N(outcome.Value.AppliedCount, "değer", "value", "values")} undone, " +
+                    $"{outcome.Value.FailedCount} failed.");
 
             _undoPreview = null;
             UndoRows.Clear();
@@ -1610,7 +1674,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         catch (Exception exception)
         {
             _log.Error("Geri alma başarısız.", exception);
-            StatusMessage = "Geri alma başarısız. Ayrıntı: " + _log.FilePath;
+            StatusMessage = Loc.T("Geri alma başarısız. Ayrıntı: ", "Undo failed. Details: ") + _log.FilePath;
         }
         finally
         {
@@ -1629,7 +1693,7 @@ internal sealed class StudioViewModel : ObservableObject, IDisposable
         // Commit başladıysa iptal düğmesi zaten devre dışı; buraya düşmez. İptal edilen bir
         // commit yalnızca dosya sınırında durur ve kalanlar "atlandı" olarak kaydedilir.
         _cancellation?.Cancel();
-        BusyMessage = "Durduruluyor";
+        BusyMessage = Loc.T("Durduruluyor", "Stopping");
     }
 
     private bool FilterChangeRow(object item)

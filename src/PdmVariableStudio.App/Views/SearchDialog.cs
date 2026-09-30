@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using PdmVariableStudio.Core.Abstractions;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.App.Views;
 
@@ -30,7 +31,7 @@ internal static class SearchDialog
 
         var recursive = new CheckBox
         {
-            Content = "Alt klasörleri de ara",
+            Content = Loc.T("Alt klasörleri de ara", "Include subfolders"),
             IsChecked = true,
             Margin = new Thickness(0, 6, 0, 10),
         };
@@ -54,23 +55,26 @@ internal static class SearchDialog
 
         var layout = new StackPanel { Margin = new Thickness(16) };
 
-        layout.Children.Add(Caption("Dosya adı"));
+        layout.Children.Add(Caption(Loc.T("Dosya adı", "File name")));
         layout.Children.Add(fileName);
-        layout.Children.Add(Hint("Joker karakter kullanabilirsiniz:  *.sldprt   ya da   MIL-*"));
+        layout.Children.Add(Hint(Loc.T("Joker karakter kullanabilirsiniz:  *.sldprt   ya da   MIL-*",
+                                        "Wildcards are allowed:  *.sldprt   or   MIL-*")));
         layout.Children.Add(recursive);
 
-        layout.Children.Add(Caption("Değişken değerine göre süz (isteğe bağlı)"));
+        layout.Children.Add(Caption(Loc.T("Değişken değerine göre süz (isteğe bağlı)", "Filter by variable value (optional)")));
 
         var variableRow = new StackPanel { Orientation = Orientation.Horizontal };
         variableRow.Children.Add(variable);
         variableRow.Children.Add(variableValue);
         layout.Children.Add(variableRow);
 
-        layout.Children.Add(Hint("Değişken seçilirse yalnızca o değişkeni bu değeri taşıyan dosyalar gelir."));
+        layout.Children.Add(Hint(Loc.T(
+            "Değişken seçilirse yalnızca o değişkeni bu değeri taşıyan dosyalar gelir.",
+            "If a variable is chosen, only files whose variable has this value are returned.")));
 
         var ok = new Button
         {
-            Content = "Ara ve Ekle",
+            Content = Loc.T("Ara ve Ekle", "Search and Add"),
             IsDefault = true,
             MinWidth = 110,
             Padding = new Thickness(14, 6, 14, 6),
@@ -79,7 +83,7 @@ internal static class SearchDialog
 
         var cancel = new Button
         {
-            Content = "İptal",
+            Content = Loc.T("İptal", "Cancel"),
             IsCancel = true,
             MinWidth = 90,
             Padding = new Thickness(14, 6, 14, 6),
@@ -98,7 +102,7 @@ internal static class SearchDialog
 
         var window = new Window
         {
-            Title = "Dosya ara",
+            Title = Loc.T("Dosya ara", "Search Files"),
             Content = layout,
             Width = 460,
             SizeToContent = SizeToContent.Height,
@@ -131,10 +135,14 @@ internal static class SearchDialog
             {
                 MessageBox.Show(
                     window,
-                    "Dosya adı ya da değişken ölçütlerinden en az birini doldurun." +
-                    Environment.NewLine + Environment.NewLine +
-                    "Boş bir aramayla vault'un tamamı listeye eklenirdi.",
-                    "Dosya ara",
+                    Loc.T(
+                        "Dosya adı ya da değişken ölçütlerinden en az birini doldurun." +
+                        Environment.NewLine + Environment.NewLine +
+                        "Boş bir aramayla vault'un tamamı listeye eklenirdi.",
+                        "Enter a file name or a variable criterion." +
+                        Environment.NewLine + Environment.NewLine +
+                        "An empty search would add the entire vault to the list."),
+                    Loc.T("Dosya ara", "Search Files"),
                     MessageBoxButton.OK,
                     MessageBoxImage.Information);
 

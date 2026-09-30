@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Text;
 using PdmVariableStudio.Core.Journal;
+using PdmVariableStudio.Core.Localization;
 
 namespace PdmVariableStudio.Core.Settings;
 
@@ -33,7 +34,7 @@ public sealed class StudioSettings
     public bool CheckInAfterApply { get; set; } = true;
 
     /// <summary>Check-in yorumu.</summary>
-    public string CheckInComment { get; set; } = "PDM Variable Studio ile toplu kart güncellemesi";
+    public string CheckInComment { get; set; } = DefaultCheckInComment();
 
     /// <summary>Son dışa aktarımın yapıldığı klasör; dosya iletişim kutuları buradan açılır.</summary>
     public string LastExportDirectory { get; set; } = string.Empty;
@@ -43,6 +44,37 @@ public sealed class StudioSettings
     /// Ekip için ağ paylaşımı verilebilir; öncelik sırası uygulama tarafında çözülür.
     /// </summary>
     public string JournalRoot { get; set; } = string.Empty;
+
+    /// <summary>Etkin dildeki varsayılan check-in yorumu.</summary>
+    public static string DefaultCheckInComment() =>
+        Loc.T("PDM Variable Studio ile toplu kart güncellemesi", "Bulk data card update with PDM Variable Studio");
+
+    /// <summary>
+    /// Kayıtlı yorum, dillerden birinin varsayılanıysa etkin dilin varsayılanına çevrilir.
+    /// </summary>
+    /// <remarks>
+    /// Varsayılan yorum her kayıtta <c>settings.json</c>'a yazılıyor. Bu olmasa, Türkçe
+    /// kullanılmış bir kurulumda dil İngilizce'ye çevrildiğinde yorum Türkçe kalırdı —
+    /// kullanıcı onu hiç yazmamışken. Kullanıcının kendi yazdığı yoruma dokunulmaz.
+    /// </remarks>
+    internal static string LocalizeIfDefault(string comment)
+    {
+        foreach (var language in new[] { UiLanguage.Turkish, UiLanguage.English })
+        {
+            string languageDefault;
+            using (Loc.Scope(language))
+            {
+                languageDefault = DefaultCheckInComment();
+            }
+
+            if (string.Equals(comment, languageDefault, StringComparison.Ordinal))
+            {
+                return DefaultCheckInComment();
+            }
+        }
+
+        return comment;
+    }
 
     public static string DefaultPath() =>
         Path.Combine(
@@ -71,7 +103,7 @@ public sealed class StudioSettings
 
             settings.IncludeSubfolders = record.Bool("includeSubfolders", settings.IncludeSubfolders);
             settings.CheckInAfterApply = record.Bool("checkInAfterApply", settings.CheckInAfterApply);
-            settings.CheckInComment = record.Text("checkInComment", settings.CheckInComment);
+            settings.CheckInComment = LocalizeIfDefault(record.Text("checkInComment", settings.CheckInComment));
             settings.LastExportDirectory = record.Text("lastExportDirectory", settings.LastExportDirectory);
             settings.JournalRoot = record.Text("journalRoot", settings.JournalRoot);
         }

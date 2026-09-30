@@ -20,6 +20,7 @@
             <views:StatusBrushConverter x:Key="StatusBrush" />
             <views:CountToVisibilityConverter x:Key="CountToVisibility" />
             <views:TextToVisibilityConverter x:Key="TextToVisibility" />
+            <views:CountNounConverter x:Key="CountNoun" />
             <views:InverseBooleanToVisibilityConverter x:Key="InverseBoolToVisibility" />
             <BooleanToVisibilityConverter x:Key="BoolToVisibility" />
 
@@ -51,16 +52,27 @@
         <!-- ============================ üst bilgi ============================ -->
         <Border Grid.Row="0" Style="{StaticResource Panel.Card}" Margin="0,0,0,10">
             <DockPanel>
-                <Button Content="Hakkında"
+                <Button Content="{views:T 'Hakkında', 'About'}"
                         Command="{Binding ShowAboutCommand}"
                         DockPanel.Dock="Right"
                         MinWidth="0"
                         Margin="0"
-                        ToolTip="Sürüm, günlük ve işlem geçmişi konumları, destek bağlantıları" />
+                        ToolTip="{views:T 'Sürüm, günlük ve işlem geçmişi konumları, destek bağlantıları', 'Version, log and operation history locations, support links'}" />
+                <!-- Dil seçimi: HKCU'ya yazılır, yeniden başlatınca geçerli olur (StudioWindow.xaml.cs). -->
+                <ComboBox x:Name="LanguagePicker"
+                          DockPanel.Dock="Right"
+                          VerticalAlignment="Center"
+                          MinWidth="90"
+                          Margin="0,0,8,0"
+                          SelectionChanged="OnLanguageChanged"
+                          ToolTip="{views:T 'Arayüz dili', 'Interface language'}">
+                    <ComboBoxItem Content="Türkçe" Tag="tr" />
+                    <ComboBoxItem Content="English" Tag="en" />
+                </ComboBox>
                 <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                     <TextBlock Text="Vault:" Style="{StaticResource Text.Muted}" Margin="0,0,6,0" />
                     <TextBlock Text="{Binding VaultName}" FontWeight="SemiBold" Margin="0,0,20,0" />
-                    <TextBlock Text="Klasör:" Style="{StaticResource Text.Muted}" Margin="0,0,6,0" />
+                    <TextBlock Text="{views:T 'Klasör:', 'Folder:'}" Style="{StaticResource Text.Muted}" Margin="0,0,6,0" />
                     <TextBlock Text="{Binding FolderPath}" FontWeight="SemiBold" />
                 </StackPanel>
             </DockPanel>
@@ -70,7 +82,7 @@
         <TabControl Grid.Row="1" Background="Transparent" BorderBrush="{StaticResource Surface.Border}">
 
             <!-- ===== DIŞA AKTAR ===== -->
-            <TabItem Header="Dışa Aktar">
+            <TabItem Header="{views:T 'Dışa Aktar', 'Export'}">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <!-- kaynak düğmeleri: satır 0 -->
@@ -87,28 +99,28 @@
                     <Border Grid.Row="0" Style="{StaticResource Panel.Card}" Margin="0,0,0,10">
                         <DockPanel>
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                <Button Content="Klasör Ekle…"
+                                <Button Content="{views:T 'Klasör Ekle…', 'Add Folder…'}"
                                         Command="{Binding AddFolderCommand}"
-                                        ToolTip="Bir klasördeki dosyaları listeye ekler" />
-                                <Button Content="Dosya Ekle…"
+                                        ToolTip="{views:T 'Bir klasördeki dosyaları listeye ekler', 'Adds the files in a folder to the list'}" />
+                                <Button Content="{views:T 'Dosya Ekle…', 'Add Files…'}"
                                         Command="{Binding AddFilesCommand}"
-                                        ToolTip="PDM'in dosya seçme penceresinden tek tek dosya ekler" />
-                                <Button Content="Ara ve Ekle…"
+                                        ToolTip="{views:T 'PDM\'in dosya seçme penceresinden tek tek dosya ekler', 'Adds individual files from the PDM file picker'}" />
+                                <Button Content="{views:T 'Ara ve Ekle…', 'Search and Add…'}"
                                         Command="{Binding SearchAndAddCommand}"
-                                        ToolTip="Dosya adı ya da kart değerine göre arayıp sonuçları ekler" />
-                                <Button Content="Montajdan Ekle…"
+                                        ToolTip="{views:T 'Dosya adı ya da kart değerine göre arayıp sonuçları ekler', 'Searches by file name or data card value and adds the results'}" />
+                                <Button Content="{views:T 'Montajdan Ekle…', 'Add from Assembly…'}"
                                         Command="{Binding AddFromAssemblyCommand}"
-                                        ToolTip="Bir montajın tüm bileşenlerini, montajın kullandığı konfigürasyonlarla ekler" />
+                                        ToolTip="{views:T 'Bir montajın tüm bileşenlerini, montajın kullandığı konfigürasyonlarla ekler', 'Adds all components of an assembly, with the configurations the assembly uses'}" />
                             </StackPanel>
 
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <CheckBox Content="Alt klasörler"
+                                <CheckBox Content="{views:T 'Alt klasörler', 'Subfolders'}"
                                           IsChecked="{Binding IncludeSubfolders}"
                                           Margin="0,0,14,0"
                                           VerticalAlignment="Center"
-                                          ToolTip="Klasör eklerken alt klasörlere de inilsin mi. Varsayılan kapalı." />
-                                <Button Content="Seçilenleri Sil" Command="{Binding RemoveSelectedFilesCommand}" MinWidth="0" />
-                                <Button Content="Listeyi Temizle" Command="{Binding ClearFilesCommand}" MinWidth="0" Margin="0" />
+                                          ToolTip="{views:T 'Klasör eklerken alt klasörlere de inilsin mi. Varsayılan kapalı.', 'Whether to include subfolders when adding a folder. Off by default.'}" />
+                                <Button Content="{views:T 'Seçilenleri Sil', 'Remove Selected'}" Command="{Binding RemoveSelectedFilesCommand}" MinWidth="0" />
+                                <Button Content="{views:T 'Listeyi Temizle', 'Clear List'}" Command="{Binding ClearFilesCommand}" MinWidth="0" Margin="0" />
                             </StackPanel>
                         </DockPanel>
                     </Border>
@@ -116,20 +128,20 @@
                     <!-- işleme alınacak dosyalar -->
                     <DataGrid Grid.Row="1" ItemsSource="{Binding Files}" IsReadOnly="False">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Sil" Width="40">
+                            <DataGridTemplateColumn Header="{views:T 'Sil', 'Remove'}" Width="64">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
                                                   HorizontalAlignment="Center" Margin="0"
-                                                  ToolTip="İşaretlenenler 'Seçilenleri Sil' ile listeden çıkarılır" />
+                                                  ToolTip="{views:T 'İşaretlenenler \'Seçilenleri Sil\' ile listeden çıkarılır', 'Checked files are removed from the list with \'Remove Selected\''}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTextColumn Header="Dosya" Binding="{Binding FileName}" Width="260" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Klasör" Binding="{Binding RelativePath}" Width="*" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Tür" Binding="{Binding TypeText}" Width="110" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Kaynak" Binding="{Binding SourceText}" Width="110" IsReadOnly="True">
+                            <DataGridTextColumn Header="{views:T 'Dosya', 'File'}" Binding="{Binding FileName}" Width="260" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Klasör', 'Folder'}" Binding="{Binding RelativePath}" Width="*" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Tür', 'Type'}" Binding="{Binding TypeText}" Width="110" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Kaynak', 'Source'}" Binding="{Binding SourceText}" Width="110" IsReadOnly="True">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock" BasedOn="{x:Static DataGridTextColumn.DefaultElementStyle}">
                                         <Setter Property="ToolTip" Value="{Binding SourceToolTip}" />
@@ -152,13 +164,13 @@
                         </Grid.RowDefinitions>
 
                         <DockPanel Grid.Row="0" Margin="0,0,0,6">
-                            <TextBlock Text="Dışa aktarılacak değişkenler"
+                            <TextBlock Text="{views:T 'Dışa aktarılacak değişkenler', 'Variables to export'}"
                                        Style="{StaticResource Text.Heading}"
                                        Margin="0"
                                        DockPanel.Dock="Left" />
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                                <Button Content="Tümünü seç" Command="{Binding SelectAllVariablesCommand}" MinWidth="0" />
-                                <Button Content="Tümünü temizle" Command="{Binding DeselectAllVariablesCommand}" MinWidth="0" Margin="0" />
+                                <Button Content="{views:T 'Tümünü seç', 'Select all'}" Command="{Binding SelectAllVariablesCommand}" MinWidth="0" />
+                                <Button Content="{views:T 'Tümünü temizle', 'Clear all'}" Command="{Binding DeselectAllVariablesCommand}" MinWidth="0" Margin="0" />
                             </StackPanel>
                         </DockPanel>
 
@@ -183,7 +195,7 @@
                     </Grid>
 
                     <DockPanel Grid.Row="4" Margin="0,12,0,0">
-                        <Button Content="Dışa Aktar…"
+                        <Button Content="{views:T 'Dışa Aktar…', 'Export…'}"
                                 Style="{StaticResource Button.Primary}"
                                 Command="{Binding ExportCommand}"
                                 DockPanel.Dock="Right"
@@ -201,13 +213,13 @@
                                        TextTrimming="CharacterEllipsis"
                                        MaxWidth="260"
                                        Margin="0,0,8,0" />
-                            <Button Content="Excel'de Aç"
+                            <Button Content="{views:T 'Excel\'de Aç', 'Open in Excel'}"
                                     Command="{Binding OpenLastExportCommand}"
-                                    ToolTip="Son dışa aktarılan çalışma kitabını varsayılan uygulamada açar"
+                                    ToolTip="{views:T 'Son dışa aktarılan çalışma kitabını varsayılan uygulamada açar', 'Opens the last exported workbook in the default application'}"
                                     Margin="0,0,6,0" />
-                            <Button Content="Klasörü Göster"
+                            <Button Content="{views:T 'Klasörü Göster', 'Show in Folder'}"
                                     Command="{Binding RevealLastExportCommand}"
-                                    ToolTip="Dosyayı Windows Gezgini'nde seçili gösterir"
+                                    ToolTip="{views:T 'Dosyayı Windows Gezgini\'nde seçili gösterir', 'Shows the file selected in Windows Explorer'}"
                                     Margin="0,0,12,0" />
                         </StackPanel>
                     </DockPanel>
@@ -215,7 +227,7 @@
             </TabItem>
 
             <!-- ===== İÇE AKTAR ===== -->
-            <TabItem Header="İçe Aktar">
+            <TabItem Header="{views:T 'İçe Aktar', 'Import'}">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -227,7 +239,7 @@
 
                     <!-- dosya seçimi + özet -->
                     <DockPanel Grid.Row="0" Margin="0,0,0,10">
-                        <Button Content="Çalışma kitabı seç…"
+                        <Button Content="{views:T 'Çalışma kitabı seç…', 'Select workbook…'}"
                                 Command="{Binding ImportCommand}"
                                 DockPanel.Dock="Left" />
                         <TextBlock Text="{Binding WorkbookPath}"
@@ -260,38 +272,38 @@
                         <WrapPanel Margin="0,0,0,8">
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Safe.Background}" Margin="0,0,8,0">
                                 <TextBlock Foreground="{StaticResource Status.Safe.Foreground}">
-                                    <Run Text="✓" /><Run Text=" " /><Run Text="{Binding SafeChangeCount, Mode=OneWay}" /><Run Text=" güvenli değişiklik" />
+                                    <Run Text="✓" /><Run Text=" " /><Run Text="{Binding SafeChangeCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='güvenli değişiklik|safe change|safe changes'}" />
                                 </TextBlock>
                             </Border>
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Conflict.Background}" Margin="0,0,8,0">
                                 <TextBlock Foreground="{StaticResource Status.Conflict.Foreground}">
-                                    <Run Text="⚠" /><Run Text=" " /><Run Text="{Binding ConflictCount, Mode=OneWay}" /><Run Text=" çakışma" />
+                                    <Run Text="⚠" /><Run Text=" " /><Run Text="{Binding ConflictCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='çakışma|conflict|conflicts'}" />
                                 </TextBlock>
                             </Border>
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Error.Background}" Margin="0,0,8,0">
                                 <TextBlock Foreground="{StaticResource Status.Error.Foreground}">
-                                    <Run Text="✗" /><Run Text=" " /><Run Text="{Binding ErrorCount, Mode=OneWay}" /><Run Text=" hata" />
+                                    <Run Text="✗" /><Run Text=" " /><Run Text="{Binding ErrorCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='hata|error|errors'}" />
                                 </TextBlock>
                             </Border>
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Blocked.Background}">
                                 <TextBlock Foreground="{StaticResource Status.Blocked.Foreground}">
-                                    <Run Text="·" /><Run Text=" " /><Run Text="{Binding UnchangedCount, Mode=OneWay}" /><Run Text=" değişmemiş" />
+                                    <Run Text="·" /><Run Text=" " /><Run Text="{Binding UnchangedCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='değişmemiş|unchanged|unchanged'}" />
                                 </TextBlock>
                             </Border>
                         </WrapPanel>
 
                         <DockPanel Margin="0,0,0,8">
                             <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
-                                <CheckBox Content="Yalnızca değişenler" IsChecked="{Binding ShowChangesOnly}" Margin="0,0,14,0" />
-                                <CheckBox Content="Çakışmalar" IsChecked="{Binding ShowConflictsOnly}" Margin="0,0,14,0" />
-                                <CheckBox Content="Hatalar" IsChecked="{Binding ShowErrorsOnly}" Margin="0,0,20,0" />
-                                <Button Content="Güvenli olanları seç" Command="{Binding SelectAllSafeCommand}" MinWidth="0" />
-                                <Button Content="Seçimi temizle" Command="{Binding DeselectAllCommand}" MinWidth="0" />
+                                <CheckBox Content="{views:T 'Yalnızca değişenler', 'Changes only'}" IsChecked="{Binding ShowChangesOnly}" Margin="0,0,14,0" />
+                                <CheckBox Content="{views:T 'Çakışmalar', 'Conflicts'}" IsChecked="{Binding ShowConflictsOnly}" Margin="0,0,14,0" />
+                                <CheckBox Content="{views:T 'Hatalar', 'Errors'}" IsChecked="{Binding ShowErrorsOnly}" Margin="0,0,20,0" />
+                                <Button Content="{views:T 'Güvenli olanları seç', 'Select safe changes'}" Command="{Binding SelectAllSafeCommand}" MinWidth="0" />
+                                <Button Content="{views:T 'Seçimi temizle', 'Clear selection'}" Command="{Binding DeselectAllCommand}" MinWidth="0" />
                             </StackPanel>
                             <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged, Delay=250}"
                                      MinWidth="180"
                                      HorizontalAlignment="Right"
-                                     ToolTip="Dosya adı, değişken ya da değere göre süz" />
+                                     ToolTip="{views:T 'Dosya adı, değişken ya da değere göre süz', 'Filter by file name, variable or value'}" />
                         </DockPanel>
                     </StackPanel>
 
@@ -301,7 +313,7 @@
                               IsReadOnly="False"
                               SelectionChanged="OnChangeSelectionChanged">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Uygula" Width="60">
+                            <DataGridTemplateColumn Header="{views:T 'Uygula', 'Apply'}" Width="60">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
@@ -314,14 +326,14 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Durum" Width="150" CellTemplate="{StaticResource StatusCell}" />
+                            <DataGridTemplateColumn Header="{views:T 'Durum', 'Status'}" Width="150" CellTemplate="{StaticResource StatusCell}" />
 
-                            <DataGridTextColumn Header="Dosya" Binding="{Binding FileName}" Width="200" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Klasör" Binding="{Binding RelativePath}" Width="150" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Dosya', 'File'}" Binding="{Binding FileName}" Width="200" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Klasör', 'Folder'}" Binding="{Binding RelativePath}" Width="150" IsReadOnly="True" />
                             <DataGridTemplateColumn Width="100">
                                 <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="Konfig."
-                                               ToolTip="&quot;@&quot; = konfigürasyondan bağımsız, dosya düzeyindeki değer (SOLIDWORKS Custom sekmesi).&#x0a;Adlandırılmış konfigürasyonlar ayrı satırlardır ve PDM kartında ayrı tutulur." />
+                                    <TextBlock Text="{views:T 'Konfig.', 'Config.'}"
+                                               ToolTip="{views:T '&quot;@&quot; = konfigürasyondan bağımsız, dosya düzeyindeki değer (SOLIDWORKS Custom sekmesi).&#x0a;Adlandırılmış konfigürasyonlar ayrı satırlardır ve PDM kartında ayrı tutulur.', '&quot;@&quot; = configuration-independent, file-level value (SOLIDWORKS Custom tab).&#x0a;Named configurations are separate rows and are stored separately on the PDM data card.'}" />
                                 </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -329,11 +341,11 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Değişken" Binding="{Binding VariableName}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Dışa aktarımdaki" Binding="{Binding OriginalValue}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="PDM'deki güncel" Binding="{Binding CurrentValue}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Excel'deki yeni" Binding="{Binding RequestedValue}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Neden" Binding="{Binding Reason}" Width="*" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Değişken', 'Variable'}" Binding="{Binding VariableName}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Dışa aktarımdaki', 'At export'}" Binding="{Binding OriginalValue}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'PDM\'deki güncel', 'Current in PDM'}" Binding="{Binding CurrentValue}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Excel\'deki yeni', 'New in Excel'}" Binding="{Binding RequestedValue}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Neden', 'Reason'}" Binding="{Binding Reason}" Width="*" IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
 
@@ -357,26 +369,26 @@
                                                Foreground="{StaticResource Warning.Foreground}" />
                                 </StackPanel>
 
-                                <CheckBox Content="Anladım, dosyalar check-out edilsin"
+                                <CheckBox Content="{views:T 'Anladım, dosyalar check-out edilsin', 'I understand, check out the files'}"
                                           IsChecked="{Binding CheckoutConsent}"
                                           Foreground="{StaticResource Warning.Foreground}" />
 
-                                <CheckBox Content="İşlem sonunda bizim çektiğimiz dosyalar check-in edilsin (yeni sürüm üretir)"
+                                <CheckBox Content="{views:T 'İşlem sonunda bizim çektiğimiz dosyalar check-in edilsin (yeni sürüm üretir)', 'Check in the files we checked out when finished (creates a new version)'}"
                                           IsChecked="{Binding CheckInAfterApply}"
                                           Foreground="{StaticResource Warning.Foreground}" />
 
                                 <TextBox Text="{Binding CheckInComment, UpdateSourceTrigger=PropertyChanged}"
                                          Margin="22,4,0,0"
                                          Visibility="{Binding CheckInAfterApply, Converter={StaticResource BoolToVisibility}}"
-                                         ToolTip="Check-in yorumu" />
+                                         ToolTip="{views:T 'Check-in yorumu', 'Check-in comment'}" />
                             </StackPanel>
                         </Border>
 
                         <DockPanel>
                             <TextBlock DockPanel.Dock="Left" Style="{StaticResource Text.Muted}">
-                                <Run Text="Seçili:" /><Run Text=" " /><Run Text="{Binding SelectedCount, Mode=OneWay}" /><Run Text=" hücre" />
+                                <Run Text="{views:T 'Seçili:', 'Selected:'}" /><Run Text=" " /><Run Text="{Binding SelectedCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='hücre|cell|cells'}" />
                             </TextBlock>
-                            <Button Content="Uygula"
+                            <Button Content="{views:T 'Uygula', 'Apply'}"
                                     Style="{StaticResource Button.Primary}"
                                     Command="{Binding ApplyCommand}"
                                     HorizontalAlignment="Right"
@@ -387,7 +399,7 @@
             </TabItem>
 
             <!-- ===== GEÇMİŞ ===== -->
-            <TabItem Header="İşlem Geçmişi">
+            <TabItem Header="{views:T 'İşlem Geçmişi', 'Operation History'}">
                 <Grid Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto" />
@@ -398,8 +410,8 @@
                     </Grid.RowDefinitions>
 
                     <DockPanel Grid.Row="0" Margin="0,0,0,6">
-                        <TextBlock Text="Son işlemler" Style="{StaticResource Text.Heading}" DockPanel.Dock="Left" />
-                        <Button Content="Yenile" Command="{Binding RefreshOperationsCommand}"
+                        <TextBlock Text="{views:T 'Son işlemler', 'Recent operations'}" Style="{StaticResource Text.Heading}" DockPanel.Dock="Left" />
+                        <Button Content="{views:T 'Yenile', 'Refresh'}" Command="{Binding RefreshOperationsCommand}"
                                 HorizontalAlignment="Right" MinWidth="0" Margin="0" />
                     </DockPanel>
 
@@ -408,32 +420,32 @@
                               SelectedItem="{Binding SelectedOperation}"
                               IsReadOnly="True">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Tarih" Binding="{Binding Timestamp}" Width="130" />
-                            <DataGridTextColumn Header="Tür" Binding="{Binding TypeText}" Width="90" />
-                            <DataGridTextColumn Header="Kullanıcı" Binding="{Binding User}" Width="120" />
-                            <DataGridTextColumn Header="Kapsam" Binding="{Binding Summary}" Width="150" />
-                            <DataGridTextColumn Header="Kaynak" Binding="{Binding Workbook}" Width="180" />
-                            <DataGridTextColumn Header="Sonuç" Binding="{Binding OutcomeText}" Width="*" />
+                            <DataGridTextColumn Header="{views:T 'Tarih', 'Date'}" Binding="{Binding Timestamp}" Width="130" />
+                            <DataGridTextColumn Header="{views:T 'Tür', 'Type'}" Binding="{Binding TypeText}" Width="90" />
+                            <DataGridTextColumn Header="{views:T 'Kullanıcı', 'User'}" Binding="{Binding User}" Width="120" />
+                            <DataGridTextColumn Header="{views:T 'Kapsam', 'Scope'}" Binding="{Binding Summary}" Width="150" />
+                            <DataGridTextColumn Header="{views:T 'Kaynak', 'Source'}" Binding="{Binding Workbook}" Width="180" />
+                            <DataGridTextColumn Header="{views:T 'Sonuç', 'Result'}" Binding="{Binding OutcomeText}" Width="*" />
                         </DataGrid.Columns>
                     </DataGrid>
 
                     <DockPanel Grid.Row="2" Margin="0,10,0,6">
-                        <TextBlock Text="Geri alma önizlemesi" Style="{StaticResource Text.Heading}" DockPanel.Dock="Left" />
+                        <TextBlock Text="{views:T 'Geri alma önizlemesi', 'Undo preview'}" Style="{StaticResource Text.Heading}" DockPanel.Dock="Left" />
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                     Visibility="{Binding HasUndoPreview, Converter={StaticResource BoolToVisibility}}">
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Safe.Background}" Margin="0,0,6,0">
                                 <TextBlock Foreground="{StaticResource Status.Safe.Foreground}">
-                                    <Run Text="✓" /><Run Text=" " /><Run Text="{Binding UndoSafeCount, Mode=OneWay}" /><Run Text=" güvenli" />
+                                    <Run Text="✓" /><Run Text=" " /><Run Text="{Binding UndoSafeCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='güvenli|safe|safe'}" />
                                 </TextBlock>
                             </Border>
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Conflict.Background}" Margin="0,0,6,0">
                                 <TextBlock Foreground="{StaticResource Status.Conflict.Foreground}">
-                                    <Run Text="⚠" /><Run Text=" " /><Run Text="{Binding UndoConflictCount, Mode=OneWay}" /><Run Text=" çakışma" />
+                                    <Run Text="⚠" /><Run Text=" " /><Run Text="{Binding UndoConflictCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='çakışma|conflict|conflicts'}" />
                                 </TextBlock>
                             </Border>
                             <Border Style="{StaticResource StatusBadge}" Background="{StaticResource Status.Blocked.Background}">
                                 <TextBlock Foreground="{StaticResource Status.Blocked.Foreground}">
-                                    <Run Text="🔒" /><Run Text=" " /><Run Text="{Binding UndoUnavailableCount, Mode=OneWay}" /><Run Text=" kullanılamaz" />
+                                    <Run Text="🔒" /><Run Text=" " /><Run Text="{Binding UndoUnavailableCount, Mode=OneWay, Converter={StaticResource CountNoun}, ConverterParameter='kullanılamaz|unavailable|unavailable'}" />
                                 </TextBlock>
                             </Border>
                         </StackPanel>
@@ -441,7 +453,7 @@
 
                     <DataGrid Grid.Row="3" ItemsSource="{Binding UndoRows}">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Geri al" Width="60">
+                            <DataGridTemplateColumn Header="{views:T 'Geri al', 'Undo'}" Width="60">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <CheckBox IsChecked="{Binding IsSelected, UpdateSourceTrigger=PropertyChanged}"
@@ -451,13 +463,13 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Durum" Width="150" CellTemplate="{StaticResource StatusCell}" />
+                            <DataGridTemplateColumn Header="{views:T 'Durum', 'Status'}" Width="150" CellTemplate="{StaticResource StatusCell}" />
 
-                            <DataGridTextColumn Header="Dosya" Binding="{Binding FileName}" Width="200" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Dosya', 'File'}" Binding="{Binding FileName}" Width="200" IsReadOnly="True" />
                             <DataGridTemplateColumn Width="100">
                                 <DataGridTemplateColumn.Header>
-                                    <TextBlock Text="Konfig."
-                                               ToolTip="&quot;@&quot; = konfigürasyondan bağımsız, dosya düzeyindeki değer (SOLIDWORKS Custom sekmesi).&#x0a;Adlandırılmış konfigürasyonlar ayrı satırlardır ve PDM kartında ayrı tutulur." />
+                                    <TextBlock Text="{views:T 'Konfig.', 'Config.'}"
+                                               ToolTip="{views:T '&quot;@&quot; = konfigürasyondan bağımsız, dosya düzeyindeki değer (SOLIDWORKS Custom sekmesi).&#x0a;Adlandırılmış konfigürasyonlar ayrı satırlardır ve PDM kartında ayrı tutulur.', '&quot;@&quot; = configuration-independent, file-level value (SOLIDWORKS Custom tab).&#x0a;Named configurations are separate rows and are stored separately on the PDM data card.'}" />
                                 </DataGridTemplateColumn.Header>
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
@@ -465,17 +477,17 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTextColumn Header="Değişken" Binding="{Binding VariableName}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Uyguladığımız" Binding="{Binding AppliedValue}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="PDM'deki güncel" Binding="{Binding CurrentValue}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Geri alınca" Binding="{Binding ValueAfterUndo}" Width="130" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Açıklama" Binding="{Binding Tooltip}" Width="*" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Değişken', 'Variable'}" Binding="{Binding VariableName}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Uyguladığımız', 'Applied value'}" Binding="{Binding AppliedValue}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'PDM\'deki güncel', 'Current in PDM'}" Binding="{Binding CurrentValue}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Geri alınca', 'After undo'}" Binding="{Binding ValueAfterUndo}" Width="130" IsReadOnly="True" />
+                            <DataGridTextColumn Header="{views:T 'Açıklama', 'Details'}" Binding="{Binding Tooltip}" Width="*" IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
 
                     <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
-                        <Button Content="Geri alma önizlemesi" Command="{Binding PreviewUndoCommand}" />
-                        <Button Content="Geri Al"
+                        <Button Content="{views:T 'Geri alma önizlemesi', 'Preview undo'}" Command="{Binding PreviewUndoCommand}" />
+                        <Button Content="{views:T 'Geri Al', 'Undo'}"
                                 Style="{StaticResource Button.Primary}"
                                 Command="{Binding ApplyUndoCommand}"
                                 Margin="0" />
@@ -491,7 +503,7 @@
                             Visibility="{Binding IsBusy, Converter={StaticResource BoolToVisibility}}">
                     <TextBlock Text="{Binding BusyMessage}" Style="{StaticResource Text.Muted}" Margin="0,0,10,0" />
                     <ProgressBar IsIndeterminate="True" Width="120" Height="6" VerticalAlignment="Center" Margin="0,0,10,0" />
-                    <Button Content="Durdur" Command="{Binding CancelCommand}" MinWidth="0" Margin="0" />
+                    <Button Content="{views:T 'Durdur', 'Stop'}" Command="{Binding CancelCommand}" MinWidth="0" Margin="0" />
                 </StackPanel>
                 <TextBlock Text="{Binding StatusMessage}" TextTrimming="CharacterEllipsis" />
             </DockPanel>

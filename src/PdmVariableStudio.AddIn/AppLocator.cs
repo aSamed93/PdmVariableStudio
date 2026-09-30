@@ -102,23 +102,32 @@ internal static class AppLocator
         var directory = Path.GetDirectoryName(executablePath) ?? string.Empty;
 
         return
-            "PDM Variable Studio eksik kurulmuş; uygulama başlatılamıyor." + Environment.NewLine +
-            Environment.NewLine +
-            "Uygulama tek bir dosyadan ibaret değildir — .exe yanındaki DLL'lerle birlikte " +
-            "kopyalanmalıdır." + Environment.NewLine + Environment.NewLine +
-            "Klasör:" + Environment.NewLine +
+            AddInText.T(
+                "PDM Variable Studio eksik kurulmuş; uygulama başlatılamıyor.",
+                "PDM Variable Studio is not installed completely; the application cannot start.") +
+            Environment.NewLine + Environment.NewLine +
+            AddInText.T(
+                "Uygulama tek bir dosyadan ibaret değildir — .exe yanındaki DLL'lerle birlikte " +
+                "kopyalanmalıdır.",
+                "The application is more than a single file — the .exe must be copied together " +
+                "with the DLLs next to it.") +
+            Environment.NewLine + Environment.NewLine +
+            AddInText.T("Klasör:", "Folder:") + Environment.NewLine +
             "    " + directory + Environment.NewLine + Environment.NewLine +
-            "Eksik dosyalar:" + Environment.NewLine +
+            AddInText.T("Eksik dosyalar:", "Missing files:") + Environment.NewLine +
             "    " + string.Join(Environment.NewLine + "    ", missing) + Environment.NewLine +
             Environment.NewLine +
-            "Doğru kurulum için derleme çıktısındaki TÜM dosyaları kopyalayın:" +
+            AddInText.T(
+                "Doğru kurulum için derleme çıktısındaki TÜM dosyaları kopyalayın:",
+                "For a correct installation copy ALL files from the build output:") +
             Environment.NewLine +
             @"    src\PdmVariableStudio.App\bin\Release\net481\*" + Environment.NewLine +
             Environment.NewLine +
-            "ya da kurulum betiğini çalıştırın:" + Environment.NewLine +
+            AddInText.T("ya da kurulum betiğini çalıştırın:", "or run the installation script:") +
+            Environment.NewLine +
             @"    powershell -File docs\install-app.ps1" + Environment.NewLine +
             Environment.NewLine +
-            "Ayrıntılı günlük: " + AddInLog.FilePath;
+            AddInText.T("Ayrıntılı günlük: ", "Detailed log: ") + AddInLog.FilePath;
     }
 
     /// <summary>Kullanıcıya gösterilecek "nereye kurulmalı" metni.</summary>
@@ -128,17 +137,25 @@ internal static class AppLocator
         var expected = Path.Combine(programFiles, DefaultFolderName, ExecutableName);
 
         return
-            "PDM Variable Studio uygulaması bu bilgisayarda bulunamadı." + Environment.NewLine +
-            Environment.NewLine +
-            "Eklenti yalnızca uygulamayı başlatır; asıl uygulama ayrı olarak kurulur." +
+            AddInText.T(
+                "PDM Variable Studio uygulaması bu bilgisayarda bulunamadı.",
+                "The PDM Variable Studio application was not found on this computer.") +
             Environment.NewLine + Environment.NewLine +
-            "Beklenen konum:" + Environment.NewLine +
+            AddInText.T(
+                "Eklenti yalnızca uygulamayı başlatır; asıl uygulama ayrı olarak kurulur.",
+                "The add-in only launches the application; the application itself is installed separately.") +
+            Environment.NewLine + Environment.NewLine +
+            AddInText.T("Beklenen konum:", "Expected location:") + Environment.NewLine +
             "    " + expected + Environment.NewLine + Environment.NewLine +
-            "Uygulama başka bir yerde (örneğin bir ağ paylaşımında) duruyorsa, yolunu şu " +
-            "kayıt defteri değerine yazın:" + Environment.NewLine +
+            AddInText.T(
+                "Uygulama başka bir yerde (örneğin bir ağ paylaşımında) duruyorsa, yolunu şu " +
+                "kayıt defteri değerine yazın:",
+                "If the application is somewhere else (for example on a network share), write its " +
+                "path to this registry value:") +
+            Environment.NewLine +
             @"    HKLM\SOFTWARE\PdmVariableStudio\InstallPath" + Environment.NewLine +
             Environment.NewLine +
-            "Ayrıntılı günlük: " + AddInLog.FilePath;
+            AddInText.T("Ayrıntılı günlük: ", "Detailed log: ") + AddInLog.FilePath;
     }
 
     private static IEnumerable<string> Candidates()

@@ -45,11 +45,15 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
     {
         try
         {
+            AddInText.Refresh();
+
             addInInfo.mbsAddInName = "PDM Variable Studio";
             addInInfo.mbsCompany = "Abdussamed Tarlak";
-            addInInfo.mbsDescription =
+            addInInfo.mbsDescription = AddInText.T(
                 "Klasördeki dosyaların kart değişkenlerini Excel'e aktarır, düzenlenmiş dosyayı " +
-                "geri alır, değişiklikleri önizleme ile uygular ve güvenle geri alır.";
+                "geri alır, değişiklikleri önizleme ile uygular ve güvenle geri alır.",
+                "Exports the data card variables of files to Excel, reads the edited workbook " +
+                "back, applies the changes after a preview and undoes them safely.");
 
             // Vault'a yeni sürüm yüklerken bu sayı ARTIRILMALI, yoksa PDM yeni paketi almaz.
             // 2: eklenti inceltildi; uygulama ayrı sürece taşındı.
@@ -57,7 +61,8 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
             // 4: eksik kurulum artık sessiz ölmek yerine açık ileti veriyor.
             // 5: uygulamaya ön plan hakkı devrediliyor (pencere arkada açılıyordu).
             // 6: gerekli PDM sürümü 33.5'ten 30.0'a indirildi (aşağıda).
-            addInInfo.mlAddInVersion = 6;
+            // 7: İngilizce desteği; metinlerin dili kayıt defterinden seçiliyor (AddInText).
+            addInInfo.mlAddInVersion = 7;
 
             // En düşük desteklenen istemci: SOLIDWORKS PDM Professional 2022 (= 30.0).
             // Geliştirme ve doğrulama 2025 (33.5) üzerinde yapıldı; kullanılan API'lerin
@@ -76,6 +81,7 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
             AddInLog.Info(
                 $"Eklenti yüklendi, komut kaydedildi. " +
                 $"Sürüm {assembly.GetName().Version}, AddInVersion {addInInfo.mlAddInVersion}, " +
+                $"dil {(AddInText.IsEnglish ? "en" : "tr")}, " +
                 $"süreç {System.Diagnostics.Process.GetCurrentProcess().ProcessName}.");
         }
         catch (Exception exception)
@@ -121,6 +127,10 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
     /// Doğruluk kodda, görünürlük bayrakta — eklenen her kısıtlayıcı bayrak, komutun
     /// sessizce görünmez kalması için yeni bir yol demek.
     /// </para>
+    /// <para>
+    /// Menü adı ürün adıdır ve çevrilmez; yalnızca ipucu metni dile göre değişir. Metin
+    /// Explorer açılırken kaydedildiği için dil değişikliği Explorer yeniden açılınca görünür.
+    /// </para>
     /// </remarks>
     private static void RegisterCommand(IEdmCmdMgr5 commandManager)
     {
@@ -130,7 +140,9 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
             OpenStudioCommandId,
             "PDM Variable Studio",
             (int)Flags,
-            "Seçili klasörün kart değişkenlerini Excel ile toplu düzenler",
+            AddInText.T(
+                "Seçili klasörün kart değişkenlerini Excel ile toplu düzenler",
+                "Bulk-edit the data card variables of the selected folder in Excel"),
             "PDM Variable Studio",
             0,
             0);
@@ -145,6 +157,8 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
             {
                 return;
             }
+
+            AddInText.Refresh();
 
             AddInLog.Info($"Komut tetiklendi (id {command.mlCmdID}, veri sayısı: {commandData?.Length ?? 0}).");
 
@@ -163,12 +177,16 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
         catch (COMException exception)
         {
             AddInLog.Error("PDM API işlemi tamamlanamadı.", exception);
-            ShowMessage(command, "PDM API işlemi tamamlanamadı.\n\nAyrıntılı günlük: " + AddInLog.FilePath);
+            ShowMessage(command,
+                AddInText.T("PDM API işlemi tamamlanamadı.", "The PDM API operation could not be completed.") +
+                "\n\n" + AddInText.T("Ayrıntılı günlük: ", "Detailed log: ") + AddInLog.FilePath);
         }
         catch (Exception exception)
         {
             AddInLog.Error("OnCmd beklenmeyen bir hatayla düştü.", exception);
-            ShowMessage(command, "PDM Variable Studio başlatılamadı.\n\nAyrıntılı günlük: " + AddInLog.FilePath);
+            ShowMessage(command,
+                AddInText.T("PDM Variable Studio başlatılamadı.", "PDM Variable Studio could not be started.") +
+                "\n\n" + AddInText.T("Ayrıntılı günlük: ", "Detailed log: ") + AddInLog.FilePath);
         }
     }
 
@@ -254,9 +272,10 @@ public sealed class VariableStudioAddIn : IEdmAddIn5
         {
             AddInLog.Error("Uygulama başlatılamadı.", exception);
             ShowMessage(command,
-                "PDM Variable Studio başlatılamadı." + Environment.NewLine + Environment.NewLine +
+                AddInText.T("PDM Variable Studio başlatılamadı.", "PDM Variable Studio could not be started.") +
+                Environment.NewLine + Environment.NewLine +
                 executable + Environment.NewLine + Environment.NewLine +
-                "Ayrıntılı günlük: " + AddInLog.FilePath);
+                AddInText.T("Ayrıntılı günlük: ", "Detailed log: ") + AddInLog.FilePath);
         }
     }
 
